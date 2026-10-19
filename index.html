@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CanVas - Studio Generator & Tool Canvas</title>
-    <!-- Tab Icon / Favicon -->
+    
+    <!-- Tab Favicon Icon -->
     <link rel="icon" href="icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="icon.png">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Custom Tailwind Configuration with Dark Mode Support -->
+    <!-- Tailwind Config for Dark Mode & GoPay Brand Colors -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -41,7 +43,7 @@
         }
     </script>
 
-    <!-- Global CSS Guardrails & Custom Animations -->
+    <!-- Global CSS Guardrails & Custom Styles -->
     <style>
         /* DISABLE BLUE TAP HIGHLIGHT ON MOBILE DEVICES */
         * {
@@ -62,7 +64,7 @@
             border-color: #00A86B !important;
         }
 
-        /* Custom smooth scrollbar */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -78,19 +80,19 @@
             background: #475569;
         }
 
-        /* Modal transitions */
+        /* Modal smooth transitions */
         .modal-overlay {
-            transition: opacity 0.25s ease-in-out;
+            transition: opacity 0.2s ease-in-out;
         }
         .modal-card {
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-in-out;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease-in-out;
         }
         .modal-overlay.hidden-modal {
             opacity: 0;
             pointer-events: none;
         }
         .modal-overlay.hidden-modal .modal-card {
-            transform: scale(0.92) translateY(10px);
+            transform: scale(0.94) translateY(8px);
             opacity: 0;
         }
         .modal-overlay.show-modal {
@@ -105,6 +107,15 @@
         /* Smooth Theme Switch */
         body, header, section, div, card, modal {
             transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        /* Hide Scrollbar for category tabs */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -122,10 +133,10 @@
     <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shadow-xs">
         <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             
-            <!-- Left: Logo "cvs.png" + Brand Name "CanVas" -->
+            <!-- Header Kiri: Logo + Nama CanVas -->
             <a href="#" class="flex items-center gap-2.5 group">
                 <div class="w-10 h-10 rounded-xl bg-gopay text-white flex items-center justify-center shadow-md shadow-gopay/20 transition-transform group-active:scale-95 overflow-hidden">
-                    <img src="cvs.png" alt="CanVas Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='icon.png'; this.onerror=function(){this.parentElement.innerHTML='<svg class=\'w-6 h-6 fill-current\' viewBox=\'0 0 24 24\'><path d=\'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\'/></svg>';}">
+                    <img src="icon.png" alt="CanVas Icon" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='cvs.png'; this.onerror=function(){this.parentElement.innerHTML='<svg class=\'w-6 h-6 fill-current\' viewBox=\'0 0 24 24\'><path d=\'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\'/></svg>';}">
                 </div>
                 <div class="flex flex-col">
                     <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-none">CanVas</span>
@@ -133,17 +144,17 @@
                 </div>
             </a>
 
-            <!-- Right: Light / Dark Mode Toggle Switcher -->
+            <!-- Header Kanan: Light/Dark Mode Switcher -->
             <button id="theme-toggle-btn" onclick="toggleDarkMode()" aria-label="Toggle Theme" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition active:scale-90 flex items-center gap-2 text-xs font-bold border border-slate-200 dark:border-slate-700">
-                <!-- Sun Icon for Dark Mode (click to go light) -->
+                <!-- Sun Icon -->
                 <svg id="icon-sun" class="w-4 h-4 hidden text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clip-rule="evenodd"/>
                 </svg>
-                <!-- Moon Icon for Light Mode (click to go dark) -->
+                <!-- Moon Icon -->
                 <svg id="icon-moon" class="w-4 h-4 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                 </svg>
-                <span id="theme-label-text" class="hidden sm:inline">Theme</span>
+                <span id="theme-label-text" class="hidden sm:inline">Tema</span>
             </button>
 
         </div>
@@ -152,15 +163,15 @@
     <!-- MAIN CONTAINER -->
     <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-4 sm:py-6 flex flex-col gap-6">
 
-        <!-- THUMBNAIL BANNER (YT 16:9 WIDESCREEN RATIO) -->
+        <!-- THUMBNAIL BANNER (16:9 YT WIDESCREEN ASPECT RATIO) -->
         <section class="w-full">
             <div class="w-full rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm bg-slate-50 dark:bg-slate-800 relative group">
-                <!-- 16:9 YouTube Widescreen Aspect Ratio -->
+                <!-- 16:9 Widescreen Ratio -->
                 <img 
                     src="cvs.png" 
                     alt="CanVas Banner Header" 
                     class="w-full object-cover aspect-video rounded-2xl transition-transform duration-500 group-hover:scale-[1.01]"
-                    onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'1280\' height=\'720\' viewBox=\'0 0 1280 720\' fill=\'none\'><rect width=\'1280\' height=\'720\' fill=\'%2300A86B\'/><path d=\'M0 0L1280 720H0V0Z\' fill=\'%2300B86B\' opacity=\'0.3\'/><text x=\'50%25\' y=\'45%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'white\' font-family=\'Plus Jakarta Sans, sans-serif\' font-size=\'48\' font-weight=\'800\'>CanVas Studio Generator</text><text x=\'50%25\' y=\'58%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'rgba(255,255,255,0.88)\' font-family=\'Plus Jakarta Sans, sans-serif\' font-size=\'22\'>11 Tool %26 Generator Canvas API</text></svg>'"
+                    onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'1280\' height=\'720\' viewBox=\'0 0 1280 720\' fill=\'none\'><rect width=\'1280\' height=\'720\' fill=\'%2300A86B\'/><path d=\'M0 0L1280 720H0V0Z\' fill=\'%2300B86B\' opacity=\'0.3\'/><text x=\'50%25\' y=\'45%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'white\' font-family=\'Plus Jakarta Sans, sans-serif\' font-size=\'52\' font-weight=\'800\'>CanVas Studio</text><text x=\'50%25\' y=\'58%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'rgba(255,255,255,0.9)\' font-family=\'Plus Jakarta Sans, sans-serif\' font-size=\'24\'>Interactive Generator %26 Image Tools</text></svg>'"
                 >
             </div>
         </section>
@@ -169,20 +180,20 @@
         <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Koleksi Fitur CanVas API</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pilih generator untuk memproses gambar. Setiap penggunaan tercatat di database.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pilih generator di bawah. Jumlah pemakaian akan terhubung langsung ke database.</p>
             </div>
 
-            <!-- Filter Category Buttons -->
+            <!-- Filter Tabs -->
             <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-                <button onclick="filterCategory('all')" id="tab-all" class="filter-tab active-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-gopay text-white shadow-sm">Semua Fitur</button>
+                <button onclick="filterCategory('all')" id="tab-all" class="filter-tab active-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-gopay text-white shadow-sm">Semua</button>
                 <button onclick="filterCategory('generator')" id="tab-generator" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Generator</button>
-                <button onclick="filterCategory('frame')" id="tab-frame" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Frame & Card</button>
+                <button onclick="filterCategory('frame')" id="tab-frame" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Frame & KTP</button>
                 <button onclick="filterCategory('social')" id="tab-social" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Social & Fun</button>
                 <button onclick="filterCategory('tools')" id="tab-tools" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Tools</button>
             </div>
         </section>
 
-        <!-- ALL 11 FEATURE CARDS GRID WITH USAGE COUNTER (x10) -->
+        <!-- 11 FEATURE CARDS GRID (NILAI BADGE DEFAULT KOSONG) -->
         <section id="features-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
             <!-- 1. Sertifikat Tolol -->
@@ -191,9 +202,9 @@
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
-                            <!-- Usage Badge Counter -->
+                            <!-- Badge Kosong Default -->
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-sertifikat">10</span>
+                                ⚡ x<span id="use-count-sertifikat-tolol"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -201,9 +212,9 @@
                         </div>
                     </div>
                     <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Sertifikat Tolol</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Buat sertifikat humoristis kustom dengan nama pilihamu.</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Buat sertifikat humoristis kustom dengan nama pilihanmu.</p>
                 </div>
-                <button onclick="openToolModal('sertifikat')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                <button onclick="openToolModal('sertifikat-tolol')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
                     <span>Gunakan Fitur</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </button>
@@ -216,7 +227,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-reminder">15</span>
+                                ⚡ x<span id="use-count-reminder"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -239,7 +250,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-quote-nokia">8</span>
+                                ⚡ x<span id="use-count-quote-nokia"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -247,7 +258,7 @@
                         </div>
                     </div>
                     <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Quote Nokia</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Pesan teks bergaya tampilan layar HP Nokia retro monokrom.</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Pesan teks bergaya layar HP Nokia retro monokrom.</p>
                 </div>
                 <button onclick="openToolModal('quote-nokia')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
                     <span>Gunakan Fitur</span>
@@ -262,7 +273,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-ffduo">18</span>
+                                ⚡ x<span id="use-count-ffduo"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -285,7 +296,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-fake-dana">27</span>
+                                ⚡ x<span id="use-count-fake-dana"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -308,7 +319,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-anime-quotes">9</span>
+                                ⚡ x<span id="use-count-anime-quotes"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -331,7 +342,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase">POST</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-mpls">12</span>
+                                ⚡ x<span id="use-count-mpls"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -354,7 +365,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase">POST</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-igqc">20</span>
+                                ⚡ x<span id="use-count-igqc"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -377,7 +388,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase">POST</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-fake-call">14</span>
+                                ⚡ x<span id="use-count-fake-call"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -394,13 +405,13 @@
             </div>
 
             <!-- 10. Fake KTP Generator -->
-            <div class="feature-card generator border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+            <div class="feature-card frame generator border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase">POST</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-fake-ktp">34</span>
+                                ⚡ x<span id="use-count-fake-ktp"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -423,7 +434,7 @@
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-400 border border-purple-200 dark:border-purple-800 uppercase">TOOLS</span>
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
-                                ⚡ x<span id="use-count-remove-bg">45</span>
+                                ⚡ x<span id="use-count-remove-bg"></span>
                             </span>
                         </div>
                         <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
@@ -442,14 +453,14 @@
         </section>
     </main>
 
-    <!-- INTERACTIVE TOOL FORM MODAL -->
+    <!-- FORM INPUT MODAL -->
     <div id="tool-form-modal" class="modal-overlay hidden-modal fixed inset-0 z-40 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
         <div class="modal-card bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-2xl w-full max-w-lg my-auto relative overflow-hidden max-h-[90vh] flex flex-col">
             <!-- Modal Header -->
             <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
                 <div class="flex items-center gap-2.5">
                     <div id="modal-tool-icon" class="w-8 h-8 rounded-lg bg-gopay-light dark:bg-gopay-darkbg text-gopay flex items-center justify-center font-bold">
-                        <!-- Icon -->
+                        <!-- Dynamic Icon -->
                     </div>
                     <div>
                         <h3 id="modal-tool-title" class="text-base font-bold text-slate-900 dark:text-white leading-tight">Form Input</h3>
@@ -461,16 +472,16 @@
                 </button>
             </div>
 
-            <!-- Modal Form Body -->
+            <!-- Form Body -->
             <div class="p-5 overflow-y-auto space-y-4 flex-1 text-slate-800 dark:text-slate-200" id="modal-form-container">
                 <!-- Dynamic Inputs -->
             </div>
 
-            <!-- Modal Form Footer -->
+            <!-- Form Footer -->
             <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
                 <button type="button" onclick="closeToolModal()" class="w-1/3 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition active:scale-95">Batal</button>
                 <button type="button" id="btn-submit-tool" onclick="submitActiveTool()" class="w-2/3 py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white font-bold text-xs transition shadow-md shadow-gopay/20 flex items-center justify-center gap-2 active:scale-95">
-                    <span>Generate Sekarang (x1)</span>
+                    <span>Generate Sekarang (+1)</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </button>
             </div>
@@ -500,7 +511,7 @@
             <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <a id="btn-download-image" href="#" download="canvas-result.png" class="py-2.5 px-3 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 col-span-2 sm:col-span-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    <span>Unduh</span>
+                    <span>Unduh Gambar</span>
                 </a>
                 <button onclick="copyResultUrl()" class="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 active:scale-95">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
@@ -514,16 +525,16 @@
         </div>
     </div>
 
-    <!-- MANDATORY: CUSTOM CENTER MODAL NOTIFICATION SYSTEM -->
+    <!-- CUSTOM CENTER NOTIFICATION MODAL -->
     <div id="custom-notification-overlay" class="modal-overlay hidden-modal fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="modal-card bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-700 max-w-xs sm:max-w-sm w-full relative text-center flex flex-col items-center">
             
-            <!-- Close Button X -->
-            <button onclick="hideNotification()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-90">
+            <!-- Close X Button -->
+            <button onclick="hideNotification()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-90" aria-label="Tutup Notifikasi">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
 
-            <!-- Dynamic Icon Container -->
+            <!-- Dynamic Icon -->
             <div id="notif-icon-container" class="w-14 h-14 rounded-2xl mb-4 flex items-center justify-center shadow-inner">
                 <!-- Icon loaded by JS -->
             </div>
@@ -532,7 +543,7 @@
             <h3 id="notif-title" class="text-base font-bold text-slate-900 dark:text-white mb-1">Notifikasi</h3>
 
             <!-- Dynamic Message -->
-            <p id="notif-message" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">Pesan deskripsi informasi.</p>
+            <p id="notif-message" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">Deskripsi pesan.</p>
 
             <!-- Action Button -->
             <button id="notif-btn" onclick="hideNotification()" class="w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition active:scale-95 shadow-xs">
@@ -552,7 +563,7 @@
             </div>
             
             <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
-                With bt rezza , api by kyz
+                With by rezza , api by kyz
             </p>
         </div>
     </footer>
@@ -567,26 +578,21 @@
         let activeToolKey = null;
         let currentGeneratedUrl = null;
 
-        // Default local usage counter initial state
-        const featureUsageData = {
-            sertifikat: 10,
-            reminder: 15,
-            'quote-nokia': 8,
-            mpls: 12,
-            igqc: 20,
-            'fake-ktp': 34,
-            'remove-bg': 45,
-            ffduo: 18,
-            'fake-dana': 27,
-            'fake-call': 14,
-            'anime-quotes': 9
-        };
+        // Semua 11 Fitur IDs
+        const ALL_FEATURE_KEYS = [
+            'sertifikat-tolol', 'reminder', 'quote-nokia', 'ffduo', 
+            'fake-dana', 'anime-quotes', 'mpls', 'igqc', 'fake-call', 
+            'fake-ktp', 'remove-bg'
+        ];
 
-        // Initialize App
+        // Object penampung hitungan lokal
+        const localUsageCounts = {};
+
+        // Inisialisasi Aplikasi
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
             initSupabase();
-            loadFeatureUsage();
+            loadFeatureCounts();
         });
 
         // 1. LIGHT / DARK MODE TOGGLE
@@ -630,71 +636,88 @@
             }
         }
 
-        // 2. SUPABASE SDK & USAGE COUNTER MANAGER
+        // 2. SUPABASE INTEGRATION & COUNTER LOADING
         function initSupabase() {
             try {
                 if (window.supabase) {
                     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 }
             } catch (e) {
-                console.log("Supabase init fallback to LocalStorage");
+                console.warn("Supabase init fallback to LocalStorage");
             }
         }
 
-        async function loadFeatureUsage() {
-            // Restore from localStorage first
-            const localStored = localStorage.getItem('canvas_usage_cache');
-            if (localStored) {
+        async function loadFeatureCounts() {
+            // Ambil data lokal dari localStorage jika ada
+            const stored = localStorage.getItem('canvas_local_counts');
+            if (stored) {
                 try {
-                    const parsed = JSON.parse(localStored);
-                    Object.assign(featureUsageData, parsed);
-                } catch(e) {}
+                    Object.assign(localUsageCounts, JSON.parse(stored));
+                } catch(e){}
             }
 
-            // Try fetching real counts from Supabase database
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient.from('canvas_usage').select('feature_key, use_count');
-                    if (data && !error && data.length > 0) {
-                        data.forEach(item => {
-                            if (item.feature_key && item.use_count !== undefined) {
-                                featureUsageData[item.feature_key] = item.use_count;
-                            }
-                        });
-                        localStorage.setItem('canvas_usage_cache', JSON.stringify(featureUsageData));
-                    }
-                } catch(e) {
-                    // Fallback seamlessly
-                }
-            }
-
-            // Render counters to UI badges
-            updateUsageUI();
-        }
-
-        function updateUsageUI() {
-            Object.keys(featureUsageData).forEach(key => {
-                const el = document.getElementById(`use-count-${key}`);
-                if (el) {
-                    el.textContent = featureUsageData[key];
+            // Inisialisasi awal ke UI (jika sudah ada data di local)
+            ALL_FEATURE_KEYS.forEach(key => {
+                if (localUsageCounts[key] !== undefined) {
+                    renderBadgeCount(key, localUsageCounts[key]);
                 }
             });
-        }
 
-        async function incrementFeatureUsage(key) {
-            if (!key) return;
-            featureUsageData[key] = (featureUsageData[key] || 0) + 1;
-            updateUsageUI();
-            localStorage.setItem('canvas_usage_cache', JSON.stringify(featureUsageData));
-
-            // Async update to Supabase
+            // Ambil data terbaru dari Supabase secara asinkron
             if (supabaseClient) {
                 try {
-                    await supabaseClient.from('canvas_usage').upsert({
-                        feature_key: key,
-                        use_count: featureUsageData[key]
-                    });
-                } catch(e) {}
+                    const { data, error } = await supabaseClient
+                        .from('feature_counts')
+                        .select('feature_id, usage_count');
+
+                    if (data && !error && Array.isArray(data)) {
+                        data.forEach(item => {
+                            if (item.feature_id) {
+                                localUsageCounts[item.feature_id] = item.usage_count || 0;
+                                renderBadgeCount(item.feature_id, item.usage_count || 0);
+                            }
+                        });
+                        localStorage.setItem('canvas_local_counts', JSON.stringify(localUsageCounts));
+                    }
+                } catch (e) {
+                    console.warn("Gagal mengambil data dari Supabase, menggunakan cache lokal.");
+                }
+            }
+        }
+
+        function renderBadgeCount(featureId, count) {
+            const badgeSpan = document.getElementById(`use-count-${featureId}`);
+            if (badgeSpan) {
+                badgeSpan.textContent = count !== undefined && count !== null ? count : '0';
+            }
+        }
+
+        function incrementUsage(featureId) {
+            if (!featureId) return;
+
+            // 1. Langsung update UI lokal (+1) secara instan tanpa menunggu network
+            const current = localUsageCounts[featureId] || 0;
+            const updated = current + 1;
+            localUsageCounts[featureId] = updated;
+            renderBadgeCount(featureId, updated);
+            localStorage.setItem('canvas_local_counts', JSON.stringify(localUsageCounts));
+
+            // 2. Kirim update ke Supabase di background (non-blocking)
+            if (supabaseClient) {
+                supabaseClient.rpc('increment_feature_count', { f_id: featureId })
+                    .then(({ data, error }) => {
+                        if (error || data === null) {
+                            // Jika RPC belum ada, fallback ke upsert standar
+                            return supabaseClient.from('feature_counts').upsert({
+                                feature_id: featureId,
+                                usage_count: updated
+                            });
+                        } else if (typeof data === 'number') {
+                            localUsageCounts[featureId] = data;
+                            renderBadgeCount(featureId, data);
+                        }
+                    })
+                    .catch(err => console.warn('Gagal sinkronisasi Supabase:', err));
             }
         }
 
@@ -767,7 +790,7 @@
             });
         }
 
-        // 5. DYNAMIC TOOL MODAL INPUT RENDERER FOR ALL 11 FEATURES
+        // 5. DYNAMIC TOOL MODAL RENDERER
         function openToolModal(key) {
             activeToolKey = key;
             const modal = document.getElementById('tool-form-modal');
@@ -782,7 +805,7 @@
 
             const inputStyle = "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 focus-ring transition";
 
-            if (key === 'sertifikat') {
+            if (key === 'sertifikat-tolol') {
                 title = "Sertifikat Tolol";
                 subtitle = "API GET - Canvas Generator";
                 iconEl.innerHTML = `📜`;
@@ -1037,30 +1060,30 @@
             }
         }
 
-        // 6. MAIN SUBMIT API DISPATCHER + USAGE COUNTER INCREMENT
+        // 6. MAIN API DISPATCHER & GENERATOR
         async function submitActiveTool() {
             if (!activeToolKey) return;
 
-            // Increment usage counter in state and Supabase (+1)
-            incrementFeatureUsage(activeToolKey);
+            // Increment usage lokal & kirim update ke Supabase secara instan
+            incrementUsage(activeToolKey);
 
             showNotification({
                 type: 'loading',
                 title: 'Memproses Gambar...',
-                message: 'Mohon tunggu, sistem sedang memproses API.'
+                message: 'Mohon tunggu sejenak, gambar sedang di-generate.'
             });
 
             try {
-                if (activeToolKey === 'sertifikat') {
+                if (activeToolKey === 'sertifikat-tolol') {
                     const name = document.getElementById('input-name').value.trim() || 'Pemain Epep Tolol';
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/sertifikat-tolol?name=${encodeURIComponent(name)}&apikey=${API_KEY}`;
-                    await fetchImageResult(targetUrl);
+                    await processDirectImageUrl(targetUrl);
                 } 
                 else if (activeToolKey === 'reminder') {
                     const text = document.getElementById('input-text').value.trim();
                     const author = document.getElementById('input-author').value.trim() || 'kyzz';
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/reminder?text=${encodeURIComponent(text)}&author=${encodeURIComponent(author)}&apikey=${API_KEY}`;
-                    await fetchImageResult(targetUrl);
+                    await processDirectImageUrl(targetUrl);
                 } 
                 else if (activeToolKey === 'quote-nokia') {
                     const message = document.getElementById('input-message').value.trim();
@@ -1068,26 +1091,26 @@
                     const date = document.getElementById('input-date').value.trim() || '13';
                     const time = document.getElementById('input-time').value.trim() || '17.00';
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/quote-nokia?message=${encodeURIComponent(message)}&sender=${encodeURIComponent(sender)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&apikey=${API_KEY}`;
-                    await fetchImageResult(targetUrl);
+                    await processDirectImageUrl(targetUrl);
                 }
                 else if (activeToolKey === 'ffduo') {
                     const user1 = document.getElementById('input-user1').value.trim() || 'Athar';
                     const user2 = document.getElementById('input-user2').value.trim() || 'Rina';
                     const template = document.getElementById('input-template').value || 'random';
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/ffduo?user1=${encodeURIComponent(user1)}&user2=${encodeURIComponent(user2)}&template=${encodeURIComponent(template)}&apikey=${API_KEY}`;
-                    await fetchImageResult(targetUrl);
+                    await processDirectImageUrl(targetUrl);
                 }
                 else if (activeToolKey === 'fake-dana') {
                     const saldo = document.getElementById('input-saldo').value.trim() || '150000';
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/fake-dana?saldo=${encodeURIComponent(saldo)}&apikey=${API_KEY}`;
-                    await fetchImageResult(targetUrl);
+                    await processDirectImageUrl(targetUrl);
                 }
                 else if (activeToolKey === 'anime-quotes') {
                     const text = document.getElementById('input-text').value.trim();
                     const username = document.getElementById('input-username').value.trim() || '- Ayanokoji';
                     const bg = document.getElementById('input-bg').value.trim() || '1';
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/anime-quotes?text=${encodeURIComponent(text)}&username=${encodeURIComponent(username)}&background=${encodeURIComponent(bg)}&apikey=${API_KEY}`;
-                    await fetchImageResult(targetUrl);
+                    await processDirectImageUrl(targetUrl);
                 }
                 else if (activeToolKey === 'mpls') {
                     const fileInput = document.getElementById('input-file-image');
@@ -1098,10 +1121,18 @@
                         formData.append('image', fileInput.files[0]);
                     } else if (urlInput && urlInput.value.trim() !== '') {
                         formData.append('url', urlInput.value.trim());
+                    } else {
+                        hideNotification();
+                        showNotification({
+                            type: 'warning',
+                            title: 'Input Dibutuhkan',
+                            message: 'Unggah file gambar atau masukkan URL gambar.'
+                        });
+                        return;
                     }
 
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/mpls?apikey=${API_KEY}`;
-                    await fetchPostResult(targetUrl, formData);
+                    await processPostFormData(targetUrl, formData);
                 } 
                 else if (activeToolKey === 'igqc') {
                     const fileInput = document.getElementById('input-file-image');
@@ -1116,7 +1147,7 @@
                     formData.append('time', time);
 
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/igqc?apikey=${API_KEY}`;
-                    await fetchPostResult(targetUrl, formData);
+                    await processPostFormData(targetUrl, formData);
                 } 
                 else if (activeToolKey === 'fake-call') {
                     const fileInput = document.getElementById('input-file-profile');
@@ -1131,7 +1162,7 @@
                     formData.append('durasi', durasi);
 
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/fake-call?apikey=${API_KEY}`;
-                    await fetchPostResult(targetUrl, formData);
+                    await processPostFormData(targetUrl, formData);
                 }
                 else if (activeToolKey === 'fake-ktp') {
                     const fileInput = document.getElementById('input-pas-photo');
@@ -1160,7 +1191,7 @@
                     formData.append('terbuat', document.getElementById('ktp-terbuat').value);
 
                     const targetUrl = `https://api.kyzzz.xyz/api/canvas/fake-ktp?apikey=${API_KEY}`;
-                    await fetchPostResult(targetUrl, formData);
+                    await processPostFormData(targetUrl, formData);
                 } 
                 else if (activeToolKey === 'remove-bg') {
                     const fileInput = document.getElementById('input-file-image');
@@ -1169,7 +1200,7 @@
                         showNotification({
                             type: 'warning',
                             title: 'Pilih File Gambar',
-                            message: 'Sertakan file foto untuk diproses.'
+                            message: 'Pilih file foto untuk diproses hapus background.'
                         });
                         return;
                     }
@@ -1179,81 +1210,114 @@
                     formData.append('image', fileInput.files[0]);
 
                     const targetUrl = `https://api.kyzzz.xyz/api/tools/remove-bg?apikey=${API_KEY}`;
-                    await fetchPostResult(targetUrl, formData);
+                    await processPostFormData(targetUrl, formData);
                 }
             } catch (err) {
                 hideNotification();
                 showNotification({
                     type: 'error',
                     title: 'Gagal Memproses',
-                    message: 'Terjadi masalah pada koneksi server API.'
+                    message: 'Terjadi masalah jaringan saat menghubungi API.'
                 });
             }
         }
 
-        // Fetch GET Image
-        async function fetchImageResult(url) {
+        // Processing GET Image Endpoint (Pencegah Macet / Freeze)
+        async function processDirectImageUrl(url) {
             try {
-                const res = await fetch(url);
-                if (!res.ok) throw new Error("Gagal mengambil respon gambar");
+                // Preload image using Image object
+                const img = new Image();
+                img.crossOrigin = "anonymous";
                 
-                const blob = await res.blob();
-                const objUrl = URL.createObjectURL(blob);
-                
+                const loadPromise = new Promise((resolve, reject) => {
+                    img.onload = () => resolve(url);
+                    img.onerror = () => reject(new Error("Gagal memuat hasil gambar"));
+                });
+
+                img.src = url;
+
+                // Timeout 15 Detik
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Waktu tunggu API habis (Timeout)")), 15000)
+                );
+
+                const finalUrl = await Promise.race([loadPromise, timeoutPromise]);
+
                 closeToolModal();
                 hideNotification();
-                openResultModal(objUrl);
+                openResultModal(finalUrl);
+
             } catch (e) {
-                hideNotification();
-                showNotification({
-                    type: 'error',
-                    title: 'Gagal Memuat',
-                    message: 'Pastikan koneksi internet aktif dan parameter valid.'
-                });
+                // Fallback attempt dengan fetch Blob jika Image CORS ketat
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error("Gagal mengambil respon gambar");
+                    const blob = await res.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    
+                    closeToolModal();
+                    hideNotification();
+                    openResultModal(objectUrl);
+                } catch(errFetch) {
+                    hideNotification();
+                    showNotification({
+                        type: 'error',
+                        title: 'Gagal Memuat Gambar',
+                        message: 'API tidak merespon atau parameter yang dimasukkan tidak valid.'
+                    });
+                }
             }
         }
 
-        // Fetch POST Image
-        async function fetchPostResult(url, formData) {
+        // Processing POST FormData Endpoint
+        async function processPostFormData(url, formData) {
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+
                 const res = await fetch(url, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    signal: controller.signal
                 });
 
+                clearTimeout(timeoutId);
+
                 if (!res.ok) {
-                    throw new Error("Gagal memproses POST request.");
+                    throw new Error(`Server API merespon dengan status error ${res.status}`);
                 }
 
                 const contentType = res.headers.get("content-type");
+                
                 if (contentType && contentType.includes("application/json")) {
                     const jsonRes = await res.json();
                     if (jsonRes.url || jsonRes.result) {
-                        const imgUrl = jsonRes.url || jsonRes.result;
+                        const resultUrl = jsonRes.url || jsonRes.result;
                         closeToolModal();
                         hideNotification();
-                        openResultModal(imgUrl);
+                        openResultModal(resultUrl);
                         return;
                     }
                 }
 
                 const blob = await res.blob();
-                const objUrl = URL.createObjectURL(blob);
+                const objectUrl = URL.createObjectURL(blob);
 
                 closeToolModal();
                 hideNotification();
-                openResultModal(objUrl);
+                openResultModal(objectUrl);
+
             } catch (e) {
                 hideNotification();
                 showNotification({
                     type: 'error',
                     title: 'Proses Gagal',
-                    message: e.message || 'Gagal memproses gambar.'
+                    message: e.name === 'AbortError' ? 'Koneksi ke API mengalami timeout.' : (e.message || 'Gagal memproses gambar.')
                 });
             }
         }
 
-        // Result Modal
+        // Result Modal Display
         function openResultModal(imageUrl) {
             currentGeneratedUrl = imageUrl;
             const modal = document.getElementById('result-modal');
@@ -1268,7 +1332,7 @@
             
             showNotification({
                 type: 'success',
-                title: 'Selesai!',
+                title: 'Berhasil!',
                 message: 'Gambar berhasil dibuat dan dicatat.',
                 autoClose: 2000
             });
