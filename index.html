@@ -1,1 +1,1359 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanVas - Multi Canvas Generator Suite</title>
 
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#16A34A',
+              hover: '#15803D',
+              active: '#166534',
+              light: '#DCFCE7',
+              border: '#BBF7D0',
+              text: '#171717'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Reset & Tap Highlight */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #171717;
+      background-color: #ffffff;
+    }
+
+    /* Custom Focus Outline for Accessibility */
+    *:focus-visible {
+      outline: 2px solid #16A34A;
+      outline-offset: 2px;
+    }
+
+    /* Prevent Text Selection on Buttons & Interactive Elements */
+    button, label, .tab-pill, .no-select {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Custom Scrollbar for Nav Tabs */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Tab Slide Transitions */
+    .tab-slide-container {
+      display: flex;
+      width: 700%; /* 7 Fitur */
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tab-slide-item {
+      width: 14.285714%; /* 100% / 7 */
+      flex-shrink: 0;
+      opacity: 0.2;
+      transform: scale(0.98);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+    }
+
+    .tab-slide-item.active-slide {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    /* Floating Animated Background Bubbles */
+    .bubble-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(220, 252, 231, 0.4));
+      border: 1px solid rgba(187, 247, 208, 0.5);
+      box-shadow: 0 8px 32px 0 rgba(22, 163, 74, 0.06);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      animation: floatUp 18s infinite linear;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(105vh) translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-15vh) translateX(50px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Ripple Animation for Buttons */
+    .ripple-btn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple-effect {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(0);
+      animation: rippleAnim 0.5s linear;
+      pointer-events: none;
+    }
+
+    @keyframes rippleAnim {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .bubble, .tab-slide-container, .tab-slide-item {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col justify-between relative bg-white text-neutral-900 antialiased selection:bg-green-100 selection:text-green-800">
+
+  <!-- Floating Background Bubbles -->
+  <div class="bubble-container" id="bubbleContainer"></div>
+
+  <!-- Main Wrapper -->
+  <div class="relative z-10 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-neutral-100 sticky top-0 z-40 transition-all">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <!-- Logo CVS dengan Fallback Ikon -->
+          <div class="w-10 h-10 rounded-xl bg-green-600 text-white flex items-center justify-center shadow-md shadow-green-600/20 overflow-hidden">
+            <img src="cvs.png" alt="CanVas Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+            <i class="fa-solid fa-paintbrush text-lg hidden"></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
+              CanVas Suite
+            </h1>
+            <p class="text-[11px] text-neutral-500 font-medium -mt-0.5">Multi Generator Tool</p>
+          </div>
+        </div>
+
+        <!-- Profil & Kuota User Trigger -->
+        <div class="flex items-center">
+          <button id="profileBtn" onclick="openProfileModal()" class="ripple-btn flex items-center space-x-2 text-xs font-semibold text-green-800 bg-green-50 hover:bg-green-100/80 px-3.5 py-1.5 rounded-full border border-green-200/80 shadow-sm transition-all active:scale-95">
+            <i class="fa-solid fa-circle-user text-base text-green-600"></i>
+            <span id="headerUserText" class="truncate max-w-[100px]">Masuk</span>
+            <span id="headerQuotaBadge" class="bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5">2/2</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full flex-grow">
+
+      <!-- Tab Navigation Slider -->
+      <div class="overflow-x-auto no-scrollbar mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div class="flex space-x-1.5 bg-neutral-100/80 p-1.5 rounded-2xl border border-neutral-200/70 min-w-[660px]">
+          <button id="tabBtn-0" onclick="goToTab(0)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-green-600 text-white shadow-sm shadow-green-600/30">
+            <i class="fa-solid fa-phone text-xs"></i>
+            <span>Fake Call</span>
+          </button>
+          <button id="tabBtn-1" onclick="goToTab(1)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
+            <i class="fa-solid fa-wallet text-xs"></i>
+            <span>Fake DANA</span>
+          </button>
+          <button id="tabBtn-2" onclick="goToTab(2)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
+            <i class="fa-solid fa-gamepad text-xs"></i>
+            <span>FF Duo</span>
+          </button>
+          <button id="tabBtn-3" onclick="goToTab(3)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
+            <i class="fa-solid fa-user-ninja text-xs"></i>
+            <span>FF Girl</span>
+          </button>
+          <button id="tabBtn-4" onclick="goToTab(4)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
+            <i class="fa-solid fa-users-viewfinder text-xs"></i>
+            <span>FF Lobby</span>
+          </button>
+          <button id="tabBtn-5" onclick="goToTab(5)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
+            <i class="fa-solid fa-credit-card text-xs"></i>
+            <span>Fake GoPay</span>
+          </button>
+          <button id="tabBtn-6" onclick="goToTab(6)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
+            <i class="fa-solid fa-face-laugh-squint text-xs"></i>
+            <span>Sticker Meme</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Layout Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Panel Left: Input Form Slider -->
+        <div class="lg:col-span-7 bg-white border border-neutral-200/80 rounded-2xl p-5 sm:p-6 shadow-xl shadow-neutral-100/80 backdrop-blur-sm overflow-hidden">
+
+          <div id="tabSlideContainer" class="tab-slide-container">
+
+            <!-- 0. Fake Call WA -->
+            <div class="tab-slide-item active-slide pr-2">
+              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
+                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                  <i class="fa-solid fa-phone text-sm"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-neutral-900">Fake Call WhatsApp</h2>
+                  <p class="text-xs text-neutral-500">Buat tangkapan layar panggilan WA palsu</p>
+                </div>
+              </div>
+
+              <form id="fakeCallForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Foto Profil Panggilan</label>
+                  <label for="callProfileInput" class="flex flex-col items-center justify-center w-full h-28 border-2 border-neutral-200 border-dashed rounded-xl cursor-pointer bg-neutral-50/50 hover:bg-green-50/30 hover:border-green-500 transition-all overflow-hidden relative group">
+                    <div id="callUploadPlaceholder" class="flex flex-col items-center justify-center py-4 text-center px-2">
+                      <div class="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-400 group-hover:text-green-600 mb-1 shadow-sm transition-colors">
+                        <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+                      </div>
+                      <p class="text-xs text-neutral-600"><span class="font-semibold text-green-600">Klik untuk unggah</span> foto profil</p>
+                      <p class="text-[10px] text-neutral-400 mt-0.5">PNG, JPG atau JPEG</p>
+                    </div>
+                    <img id="callImagePreview" class="hidden absolute inset-0 h-full w-full object-cover" alt="Preview">
+                    <input id="callProfileInput" type="file" accept="image/*" class="hidden" />
+                  </label>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Nama / Kontak</label>
+                  <input type="text" id="callNamaInput" placeholder="my heart ❤️" required
+                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Durasi Panggilan</label>
+                  <input type="text" id="callDurasiInput" value="01:00:39" required
+                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                </div>
+
+                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                  <span>Buat Fake Call</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- 1. Fake Saldo DANA -->
+            <div class="tab-slide-item px-2">
+              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
+                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                  <i class="fa-solid fa-wallet text-sm"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-neutral-900">Fake Saldo DANA</h2>
+                  <p class="text-xs text-neutral-500">Generasi tampilan dompet digital DANA</p>
+                </div>
+              </div>
+
+              <form id="fakeDanaForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Jumlah Saldo (Rp)</label>
+                  <div class="relative">
+                    <span class="absolute left-3.5 top-2.5 text-neutral-500 font-semibold text-sm">Rp</span>
+                    <input type="number" id="danaSaldoInput" value="150000" min="0" required
+                      class="w-full bg-white border border-neutral-200 rounded-xl pl-10 pr-3.5 py-2.5 text-sm text-neutral-900 font-semibold focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-neutral-500 mb-2">Pilih Nominal Cepat:</label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="setDanaSaldo(50000)" class="ripple-btn bg-neutral-50 border border-neutral-200 hover:border-green-500 hover:bg-green-50/50 rounded-lg py-2 text-xs font-semibold text-neutral-700 transition-all">50 Ribu</button>
+                    <button type="button" onclick="setDanaSaldo(500000)" class="ripple-btn bg-neutral-50 border border-neutral-200 hover:border-green-500 hover:bg-green-50/50 rounded-lg py-2 text-xs font-semibold text-neutral-700 transition-all">500 Ribu</button>
+                    <button type="button" onclick="setDanaSaldo(2500000)" class="ripple-btn bg-neutral-50 border border-neutral-200 hover:border-green-500 hover:bg-green-50/50 rounded-lg py-2 text-xs font-semibold text-neutral-700 transition-all">2.5 Juta</button>
+                  </div>
+                </div>
+
+                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                  <span>Buat Fake DANA</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- 2. Free Fire Duo -->
+            <div class="tab-slide-item px-2">
+              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
+                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                  <i class="fa-solid fa-gamepad text-sm"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-neutral-900">Free Fire Duo</h2>
+                  <p class="text-xs text-neutral-500">Banner pasangan game Free Fire</p>
+                </div>
+              </div>
+
+              <form id="ffDuoForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Nama Pemain 1</label>
+                  <input type="text" id="ffDuoUser1" placeholder="Athar" required
+                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Nama Pemain 2</label>
+                  <input type="text" id="ffDuoUser2" placeholder="Rina" required
+                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Desain Template</label>
+                  <select id="ffDuoTemplate" class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                    <option value="random">Acak (Random)</option>
+                    <option value="1">Template 1</option>
+                    <option value="2">Template 2</option>
+                    <option value="3">Template 3</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                  <span>Buat FF Duo</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- 3. Free Fire Girl -->
+            <div class="tab-slide-item px-2">
+              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
+                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                  <i class="fa-solid fa-user-ninja text-sm"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-neutral-900">Free Fire Girl</h2>
+                  <p class="text-xs text-neutral-500">Banner karakter cewek FF custom</p>
+                </div>
+              </div>
+
+              <form id="ffGirlForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Username / Nickname</label>
+                  <input type="text" id="ffGirlUser" placeholder="Athar" required
+                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Desain Template</label>
+                  <select id="ffGirlTemplate" class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                    <option value="random">Acak (Random)</option>
+                    <option value="1">Template 1</option>
+                    <option value="2">Template 2</option>
+                    <option value="3">Template 3</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                  <span>Buat FF Girl Canvas</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- 4. Fake FF Lobby -->
+            <div class="tab-slide-item px-2">
+              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
+                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                  <i class="fa-solid fa-users-viewfinder text-sm"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-neutral-900">Fake FF Lobby</h2>
+                  <p class="text-xs text-neutral-500">Simulasi tampilan lobby game FF</p>
+                </div>
+              </div>
+
+              <form id="fakeFfLobbyForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Username Utama</label>
+                  <input type="text" id="fakeFfUser" placeholder="kyzz" required
+                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Jumlah Orang di Lobby</label>
+                  <select id="fakeFfLobby" class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                    <option value="1">1 Orang (Solo)</option>
+                    <option value="2">2 Orang (Duo)</option>
+                    <option value="3">3 Orang</option>
+                    <option value="4">4 Orang (Squad)</option>
+                    <option value="5" selected>5 Orang (Full Squad)</option>
+                  </select>
+                </div>
+
+                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                  <span>Buat Fake FF Lobby</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- 5. Fake GoPay -->
+            <div class="tab-slide-item px-2">
+              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
+                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                  <i class="fa-solid fa-credit-card text-sm"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-neutral-900">Fake GoPay Status</h2>
+                  <p class="text-xs text-neutral-500">Ringkasan saldo & transaksi GoPay</p>
+                </div>
+              </div>
+
+              <form id="fakeGopayForm" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Saldo GoPay (Rp)</label>
+                    <input type="number" id="gopaySaldo" value="890000" required
+                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 font-semibold focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Jumlah Koin</label>
+                    <input type="number" id="gopayKoin" value="159" required
+                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Terpakai (Rp)</label>
+                    <input type="number" id="gopayTerpakai" value="50000" required
+                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Nama Bulan</label>
+                    <input type="text" id="gopayBulan" value="Mei" required
+                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                  </div>
+                </div>
+
+                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                  <span>Buat Fake GoPay</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- 6. Sticker Meme / Smeme -->
+            <div class="tab-slide-item pl-2">
+              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
+                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                  <i class="fa-solid fa-face-laugh-squint text-sm"></i>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-neutral-900">Sticker Meme Generator</h2>
+                  <p class="text-xs text-neutral-500">Tambahkan teks meme pada gambar pilihan Anda</p>
+                </div>
+              </div>
+
+              <form id="smemeForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Gambar Meme</label>
+                  <label for="smemeMediaInput" class="flex flex-col items-center justify-center w-full h-24 border-2 border-neutral-200 border-dashed rounded-xl cursor-pointer bg-neutral-50/50 hover:bg-green-50/30 hover:border-green-500 transition-all overflow-hidden relative group">
+                    <div id="smemeUploadPlaceholder" class="flex flex-col items-center justify-center py-2 text-center px-2">
+                      <i class="fa-solid fa-image text-base text-neutral-400 group-hover:text-green-600 mb-1 transition-colors"></i>
+                      <p class="text-xs text-neutral-600"><span class="font-semibold text-green-600">Pilih Gambar</span> untuk meme</p>
+                    </div>
+                    <img id="smemeImagePreview" class="hidden absolute inset-0 h-full w-full object-cover" alt="Preview">
+                    <input id="smemeMediaInput" type="file" accept="image/*" class="hidden" />
+                  </label>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Teks Atas (Text 1)</label>
+                    <input type="text" id="smemeText1" placeholder="Hai" required
+                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Teks Bawah (Text 2)</label>
+                    <input type="text" id="smemeText2" placeholder="Cantik"
+                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
+                  </div>
+                </div>
+
+                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                  <span>Buat Sticker Meme</span>
+                </button>
+              </form>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Panel Right: Output View -->
+        <div class="lg:col-span-5 bg-white border border-neutral-200/80 rounded-2xl p-6 shadow-xl shadow-neutral-100/80 backdrop-blur-sm flex flex-col items-center justify-center min-h-[420px] transition-all relative">
+
+          <div class="w-full flex items-center justify-between mb-4 border-b border-neutral-100 pb-3">
+            <h2 class="text-sm font-bold text-neutral-800 flex items-center">
+              <i class="fa-regular fa-image text-green-600 mr-2"></i> Hasil Output Canvas
+            </h2>
+            <span id="outputBadge" class="hidden text-[10px] font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Selesai</span>
+          </div>
+
+          <!-- Initial Empty Placeholder -->
+          <div id="resultPlaceholder" class="text-center py-10 px-4 flex flex-col items-center my-auto">
+            <div class="w-16 h-16 bg-neutral-100 border border-neutral-200 rounded-2xl flex items-center justify-center text-neutral-400 mb-3 shadow-inner">
+              <i class="fa-regular fa-images text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-neutral-700 mb-1">Belum Ada Hasil</h3>
+            <p class="text-xs text-neutral-500 max-w-[220px]">Isi formulir di sebelah kiri dan tekan tombol buat untuk melihat preview.</p>
+          </div>
+
+          <!-- Loading State Spinner -->
+          <div id="loadingState" class="hidden text-center py-12 flex flex-col items-center my-auto">
+            <div class="relative w-12 h-12 mb-4">
+              <div class="absolute inset-0 rounded-full border-4 border-green-100"></div>
+              <div class="absolute inset-0 rounded-full border-4 border-green-600 border-t-transparent animate-spin"></div>
+            </div>
+            <p class="text-sm font-semibold text-neutral-800">Sedang Memproses...</p>
+            <p class="text-xs text-neutral-500 mt-1">Sistem sedang merender gambar Anda</p>
+          </div>
+
+          <!-- Result Image Display Container -->
+          <div id="resultContainer" class="hidden w-full flex flex-col items-center space-y-4 my-auto">
+            <div class="relative group rounded-xl overflow-hidden border border-neutral-200/80 max-w-[290px] sm:max-w-[320px] shadow-lg bg-neutral-50">
+              <img id="resultImage" class="w-full h-auto object-contain max-h-[380px] transition-transform duration-300 group-hover:scale-[1.02]" alt="Result Image">
+            </div>
+
+            <a id="downloadBtn" href="#" target="_blank" download="canvas-result.jpg"
+              class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white text-center py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-download"></i>
+              <span>Unduh Gambar Tampilan</span>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-neutral-100 bg-white py-4 text-center text-xs text-neutral-500 mt-auto">
+      <p>&copy; 2026 Rezza CanVas Web App. All rights reserved.</p>
+    </footer>
+
+  </div>
+
+  <!-- MODAL: LOGIN / REGISTER -->
+  <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden opacity-0 transition-all duration-300">
+    <div class="bg-white rounded-2xl border border-neutral-200/80 shadow-2xl w-full max-w-sm p-6 m-4 relative transform scale-95 transition-all duration-300">
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 p-1">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Auth Tab Switcher -->
+      <div id="authTabs" class="flex border-b border-neutral-100 mb-5">
+        <button id="tabLoginBtn" onclick="switchAuthMode('login')" class="flex-1 pb-2.5 text-center text-sm font-bold text-green-600 border-b-2 border-green-600 transition-all">Login</button>
+        <button id="tabRegisterBtn" onclick="switchAuthMode('register')" class="flex-1 pb-2.5 text-center text-sm font-bold text-neutral-400 hover:text-neutral-700 transition-all">Daftar</button>
+      </div>
+
+      <!-- Logged Out View: Form Login -->
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-neutral-700 mb-1">Username / Email</label>
+          <input type="text" id="loginUser" placeholder="Masukkan username" required class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 transition-all">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-neutral-700 mb-1">Password</label>
+          <input type="password" id="loginPass" placeholder="••••••••" required class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 transition-all">
+        </div>
+        <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-green-600/20">
+          Masuk Sekarang
+        </button>
+      </form>
+
+      <!-- Logged Out View: Form Daftar -->
+      <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-semibold text-neutral-700 mb-1">Username</label>
+          <input type="text" id="regUser" placeholder="Username baru" required class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 transition-all">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-neutral-700 mb-1">Password</label>
+          <input type="password" id="regPass" placeholder="••••••••" required class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 transition-all">
+        </div>
+        <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-green-600/20">
+          Buat Akun Gratis
+        </button>
+      </form>
+
+      <!-- Logged In Profile Card View -->
+      <div id="loggedInView" class="hidden text-center py-2 space-y-4">
+        <div class="w-16 h-16 rounded-full bg-green-100 text-green-600 border-2 border-green-200 flex items-center justify-center mx-auto text-2xl shadow-sm">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+        <div>
+          <h3 id="loggedInUsername" class="text-base font-bold text-neutral-900">User</h3>
+          <p class="text-xs text-green-600 font-semibold bg-green-50 inline-block px-2.5 py-0.5 rounded-full border border-green-200 mt-1">Akses Gratis Tanpa Batas</p>
+        </div>
+        <button onclick="handleLogout()" class="ripple-btn w-full bg-neutral-100 hover:bg-neutral-200 active:scale-[0.98] text-neutral-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition-all flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-right-from-bracket text-red-500"></i>
+          <span>Keluar (Logout)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOTIFIKASI KESEMPATAN HABIS (DITENGAH LAYAR) -->
+  <div id="quotaExceededModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden opacity-0 transition-all duration-300">
+    <div class="bg-white rounded-2xl border border-neutral-200/80 shadow-2xl w-full max-w-sm p-6 m-4 text-center transform scale-95 transition-all duration-300">
+      <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-amber-200">
+        <i class="fa-solid fa-lock text-2xl"></i>
+      </div>
+      <h3 class="text-base font-bold text-neutral-900 mb-2">Akses Terbatas</h3>
+      <p class="text-xs text-neutral-600 mb-6 leading-relaxed font-medium">
+        Maaf, Kesempatan anda telah habis, silahkan login untuk menikmati CanVas kami secara gratis.
+      </p>
+      <div class="space-y-2">
+        <button onclick="closeQuotaModalAndOpenLogin()" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-right-to-bracket text-xs"></i>
+          <span>Login Sekarang</span>
+        </button>
+        <button onclick="closeQuotaModal()" class="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 font-semibold py-2 px-4 rounded-xl text-xs transition-all">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOTIFIKASI UMUM & ERROR (DITENGAH DENGAN TOMBOL X) -->
+  <div id="alertModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden opacity-0 transition-all duration-300">
+    <div class="bg-white rounded-2xl border border-neutral-200/80 shadow-2xl w-full max-w-sm p-6 m-4 relative transform scale-95 transition-all duration-300 text-center">
+      <!-- Tombol X Close -->
+      <button onclick="closeAlertModal()" class="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 p-1.5 rounded-lg hover:bg-neutral-100 transition-colors">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <!-- Dynamic Icon Container -->
+      <div id="alertIconContainer" class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-neutral-200">
+        <i class="fa-solid fa-circle-info text-2xl"></i>
+      </div>
+
+      <h3 id="alertTitle" class="text-base font-bold text-neutral-900 mb-2">Notifikasi</h3>
+      <p id="alertMessage" class="text-xs text-neutral-600 mb-6 leading-relaxed font-medium break-words">
+        Pesan informasi sistem.
+      </p>
+
+      <button onclick="closeAlertModal()" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all shadow-md shadow-green-600/20">
+        Tutup
+      </button>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Logic -->
+  <script>
+    // System Constants
+    const API_KEY = "kyzz73447047341593";
+    let currentTabIndex = 0;
+
+    // Supabase Initialization
+    const SUPABASE_URL = "https://xnbntgxciqvhfzalazeb.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYm50Z3hjaXF2aGZ6YWxhemViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDY1NTAsImV4cCI6MjEwNzcyMjU1MH0.6nP2k8ggFBwLhQRTyTv80y7cDp57_4OblsrpjN1eoko";
+    const supabaseClient = (window.supabase && window.supabase.createClient) 
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+      : null;
+
+    // State Management for Auth & Quota
+    const MAX_GUEST_QUOTA = 2;
+    let isLoggedIn = false;
+    let currentUser = null;
+    let activeQuotaChannel = null;
+
+    // SUPABASE REALTIME QUOTA SUBSCRIBER
+    const subscribeRealtimeQuota = (idUserAktif) => {
+      if (!supabaseClient || !idUserAktif) return;
+
+      // Unsubscribe jika sudah ada channel aktif sebelumnya
+      if (activeQuotaChannel) {
+        supabaseClient.removeChannel(activeQuotaChannel);
+      }
+
+      activeQuotaChannel = supabaseClient
+        .channel(`realtime_status_kuota_${idUserAktif}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'user_quotas',
+            filter: `id=eq.${idUserAktif}`
+          },
+          (payload) => {
+            const dataBaru = payload.new;
+            console.log("Ada Update Kuota Realtime:", dataBaru);
+
+            // Update UI Badge sisa kuota
+            const remQuota = Math.max(0, dataBaru.quota_limit - dataBaru.quota_used);
+            const badge = document.getElementById('headerQuotaBadge');
+            if (badge) {
+              badge.innerText = `${remQuota}/${dataBaru.quota_limit}`;
+              if (dataBaru.is_expired || remQuota <= 0) {
+                badge.className = "bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
+              } else {
+                badge.className = "bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
+              }
+            }
+
+            // DETEKSI REALTIME: Jika kuota habis (is_expired atau sisa = 0)
+            if (dataBaru.is_expired || dataBaru.quota_used >= dataBaru.quota_limit) {
+              // Tutup loading/hasil, kemudian buka modal pembatas
+              if (typeof closeAlertModal === "function") closeAlertModal();
+              openQuotaModal(); // Membuka modal "Akses Terbatas / Kesempatan Habis"
+            }
+          }
+        )
+        .subscribe();
+    };
+
+    // Ambil Data Kuota Awal Pengguna dari Supabase
+    async function fetchUserQuota(userId) {
+      if (!supabaseClient || !userId) return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('user_quotas')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (data && !error) {
+          const remQuota = Math.max(0, data.quota_limit - data.quota_used);
+          const badge = document.getElementById('headerQuotaBadge');
+          if (badge) {
+            badge.innerText = `${remQuota}/${data.quota_limit}`;
+            if (data.is_expired || remQuota <= 0) {
+              badge.className = "bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
+            } else {
+              badge.className = "bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
+            }
+          }
+
+          if (data.is_expired || remQuota <= 0) {
+            openQuotaModal();
+          }
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data kuota:", err);
+      }
+    }
+
+    // Initialize User Session & Guest Quota
+    async function initUserSession() {
+      const savedUser = localStorage.getItem('canvas_user');
+      if (savedUser) {
+        isLoggedIn = true;
+        currentUser = JSON.parse(savedUser);
+        if (currentUser.id) {
+          await fetchUserQuota(currentUser.id);
+          subscribeRealtimeQuota(currentUser.id);
+        }
+      }
+      updateAuthUI();
+    }
+
+    function getRemainingQuota() {
+      const used = parseInt(localStorage.getItem('canvas_guest_uses') || '0');
+      return Math.max(0, MAX_GUEST_QUOTA - used);
+    }
+
+    function updateAuthUI() {
+      const headerUserText = document.getElementById('headerUserText');
+      const headerQuotaBadge = document.getElementById('headerQuotaBadge');
+
+      if (isLoggedIn && currentUser) {
+        headerUserText.innerText = currentUser.username;
+        if (!currentUser.id) {
+          headerQuotaBadge.className = "bg-green-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-0.5";
+          headerQuotaBadge.innerText = "VIP";
+        }
+      } else {
+        const rem = getRemainingQuota();
+        headerUserText.innerText = "Masuk";
+        if (rem > 0) {
+          headerQuotaBadge.className = "bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
+        } else {
+          headerQuotaBadge.className = "bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
+        }
+        headerQuotaBadge.innerText = `${rem}/${MAX_GUEST_QUOTA}`;
+      }
+    }
+
+    // Modal Profile Control Logic
+    function openProfileModal() {
+      const modal = document.getElementById('authModal');
+      const card = modal.querySelector('div');
+      
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const loggedInView = document.getElementById('loggedInView');
+      const authTabs = document.getElementById('authTabs');
+
+      if (isLoggedIn && currentUser) {
+        loginForm.classList.add('hidden');
+        registerForm.classList.add('hidden');
+        authTabs.classList.add('hidden');
+        loggedInView.classList.remove('hidden');
+        document.getElementById('loggedInUsername').innerText = currentUser.username;
+      } else {
+        loggedInView.classList.add('hidden');
+        authTabs.classList.remove('hidden');
+        switchAuthMode('login');
+      }
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        card.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('authModal');
+      const card = modal.querySelector('div');
+      modal.classList.add('opacity-0');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    function switchAuthMode(mode) {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+
+      if (mode === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        tabLoginBtn.className = "flex-1 pb-2.5 text-center text-sm font-bold text-green-600 border-b-2 border-green-600 transition-all";
+        tabRegisterBtn.className = "flex-1 pb-2.5 text-center text-sm font-bold text-neutral-400 hover:text-neutral-700 transition-all";
+      } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        tabRegisterBtn.className = "flex-1 pb-2.5 text-center text-sm font-bold text-green-600 border-b-2 border-green-600 transition-all";
+        tabLoginBtn.className = "flex-1 pb-2.5 text-center text-sm font-bold text-neutral-400 hover:text-neutral-700 transition-all";
+      }
+    }
+
+    // Auth Submit with Supabase Integration
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const userVal = document.getElementById('loginUser').value.trim();
+      const passVal = document.getElementById('loginPass').value.trim();
+      if (!userVal || !passVal) return;
+
+      if (supabaseClient) {
+        const email = userVal.includes('@') ? userVal : `${userVal.toLowerCase().replace(/\s+/g, '')}@canvas.app`;
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: passVal
+        });
+
+        if (!error && data?.user) {
+          isLoggedIn = true;
+          currentUser = { 
+            id: data.user.id, 
+            username: data.user.user_metadata?.username || userVal, 
+            email: data.user.email 
+          };
+          localStorage.setItem('canvas_user', JSON.stringify(currentUser));
+          updateAuthUI();
+          closeAuthModal();
+          
+          // Sinkronisasi realtime & kuota
+          await fetchUserQuota(currentUser.id);
+          subscribeRealtimeQuota(currentUser.id);
+
+          showAlertModal("Berhasil Login", `Selamat datang kembali, ${currentUser.username}!`, "success");
+          return;
+        }
+      }
+
+      // Fallback Local Storage User
+      isLoggedIn = true;
+      currentUser = { username: userVal };
+      localStorage.setItem('canvas_user', JSON.stringify(currentUser));
+      updateAuthUI();
+      closeAuthModal();
+      showAlertModal("Berhasil Login", `Selamat datang kembali, ${userVal}!`, "success");
+    }
+
+    async function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const userVal = document.getElementById('regUser').value.trim();
+      const passVal = document.getElementById('regPass').value.trim();
+      if (!userVal || !passVal) return;
+
+      if (supabaseClient) {
+        const email = userVal.includes('@') ? userVal : `${userVal.toLowerCase().replace(/\s+/g, '')}@canvas.app`;
+        const { data, error } = await supabaseClient.auth.signUp({
+          email: email,
+          password: passVal,
+          options: { data: { username: userVal } }
+        });
+
+        if (!error && data?.user) {
+          isLoggedIn = true;
+          currentUser = { id: data.user.id, username: userVal, email: email };
+          localStorage.setItem('canvas_user', JSON.stringify(currentUser));
+          updateAuthUI();
+          closeAuthModal();
+
+          // Sinkronisasi realtime & kuota
+          await fetchUserQuota(currentUser.id);
+          subscribeRealtimeQuota(currentUser.id);
+
+          showAlertModal("Registrasi Berhasil", `Akun berhasil dibuat! Selamat datang, ${userVal}.`, "success");
+          return;
+        }
+      }
+
+      // Fallback Local Storage User
+      isLoggedIn = true;
+      currentUser = { username: userVal };
+      localStorage.setItem('canvas_user', JSON.stringify(currentUser));
+      updateAuthUI();
+      closeAuthModal();
+      showAlertModal("Registrasi Berhasil", `Akun berhasil dibuat! Selamat datang, ${userVal}.`, "success");
+    }
+
+    function handleLogout() {
+      if (supabaseClient) {
+        supabaseClient.auth.signOut();
+        if (activeQuotaChannel) {
+          supabaseClient.removeChannel(activeQuotaChannel);
+          activeQuotaChannel = null;
+        }
+      }
+      isLoggedIn = false;
+      currentUser = null;
+      localStorage.removeItem('canvas_user');
+      updateAuthUI();
+      closeAuthModal();
+      showAlertModal("Informasi", "Berhasil keluar dari akun.", "info");
+    }
+
+    // Quota Limit Modal Functions
+    function openQuotaModal() {
+      const modal = document.getElementById('quotaExceededModal');
+      const card = modal.querySelector('div');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        card.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeQuotaModal() {
+      const modal = document.getElementById('quotaExceededModal');
+      const card = modal.querySelector('div');
+      modal.classList.add('opacity-0');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    function closeQuotaModalAndOpenLogin() {
+      closeQuotaModal();
+      setTimeout(() => {
+        openProfileModal();
+      }, 300);
+    }
+
+    // Centered Alert Modal System
+    function showAlertModal(title, message, type = 'info') {
+      const modal = document.getElementById('alertModal');
+      const card = modal.querySelector('div');
+      const iconContainer = document.getElementById('alertIconContainer');
+      const titleEl = document.getElementById('alertTitle');
+      const msgEl = document.getElementById('alertMessage');
+
+      titleEl.innerText = title;
+      msgEl.innerText = message;
+
+      if (type === 'error') {
+        iconContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-100 text-red-600 border border-red-200 shadow-sm";
+        iconContainer.innerHTML = '<i class="fa-solid fa-circle-exclamation text-2xl"></i>';
+      } else if (type === 'success') {
+        iconContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-green-100 text-green-600 border border-green-200 shadow-sm";
+        iconContainer.innerHTML = '<i class="fa-solid fa-circle-check text-2xl"></i>';
+      } else if (type === 'warning') {
+        iconContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-100 text-amber-600 border border-amber-200 shadow-sm";
+        iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-2xl"></i>';
+      } else {
+        iconContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-blue-100 text-blue-600 border border-blue-200 shadow-sm";
+        iconContainer.innerHTML = '<i class="fa-solid fa-circle-info text-2xl"></i>';
+      }
+
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        card.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeAlertModal() {
+      const modal = document.getElementById('alertModal');
+      const card = modal.querySelector('div');
+      modal.classList.add('opacity-0');
+      card.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    function checkCanGenerate() {
+      if (isLoggedIn) return true;
+      const rem = getRemainingQuota();
+      if (rem <= 0) {
+        openQuotaModal();
+        return false;
+      }
+      return true;
+    }
+
+    // Potong kuota pengguna (Guest atau Supabase User)
+    async function decrementUserQuota() {
+      if (!isLoggedIn || !currentUser?.id || !supabaseClient) {
+        decrementGuestQuota();
+        return true;
+      }
+
+      try {
+        const { data, error } = await supabaseClient.rpc('use_user_quota', {
+          user_id: currentUser.id,
+          amount: 1
+        });
+
+        if (error || (data && !data.success)) {
+          if (data && data.is_expired) {
+            openQuotaModal();
+          } else {
+            showAlertModal("Batas Kuota", data?.message || "Masa kuota Anda telah habis.", "warning");
+          }
+          return false;
+        }
+        return true;
+      } catch (err) {
+        console.error("Gagal update kuota RPC:", err);
+        return true;
+      }
+    }
+
+    function decrementGuestQuota() {
+      if (isLoggedIn) return;
+      let used = parseInt(localStorage.getItem('canvas_guest_uses') || '0');
+      used += 1;
+      localStorage.setItem('canvas_guest_uses', used.toString());
+      updateAuthUI();
+    }
+
+    // Set Dana Saldo Helper
+    function setDanaSaldo(value) {
+      document.getElementById('danaSaldoInput').value = value;
+    }
+
+    // Background Bubble Generator
+    function initBubbles() {
+      const container = document.getElementById('bubbleContainer');
+      const count = 10;
+      for (let i = 0; i < count; i++) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        const size = Math.random() * 60 + 20; // 20px - 80px
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 95}%`;
+        bubble.style.animationDuration = `${Math.random() * 12 + 14}s`; // 14s - 26s
+        bubble.style.animationDelay = `${Math.random() * 8}s`;
+        container.appendChild(bubble);
+      }
+    }
+
+    // Ripple Effect Logic
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('.ripple-btn');
+      if (btn) {
+        const rect = btn.getBoundingClientRect();
+        const circle = document.createElement('span');
+        const diameter = Math.max(rect.width, rect.height);
+        const radius = diameter / 2;
+
+        circle.style.width = circle.style.height = `${diameter}px`;
+        circle.style.left = `${e.clientX - rect.left - radius}px`;
+        circle.style.top = `${e.clientY - rect.top - radius}px`;
+        circle.classList.add('ripple-effect');
+
+        const existing = btn.getElementsByClassName('ripple-effect')[0];
+        if (existing) existing.remove();
+
+        btn.appendChild(circle);
+      }
+    });
+
+    // Slide Switcher Function
+    function goToTab(index) {
+      currentTabIndex = index;
+      const container = document.getElementById('tabSlideContainer');
+      const items = document.querySelectorAll('.tab-slide-item');
+      const buttons = document.querySelectorAll('.tab-pill');
+
+      // Slide container offset
+      container.style.transform = `translateX(-${index * 14.285714}%)`;
+
+      // Update Opacity & Scale
+      items.forEach((item, idx) => {
+        if (idx === index) {
+          item.classList.add('active-slide');
+        } else {
+          item.classList.remove('active-slide');
+        }
+      });
+
+      // Button Styles
+      const activeBtn = "tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-green-600 text-white shadow-sm shadow-green-600/30";
+      const inactiveBtn = "tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60";
+
+      buttons.forEach((btn, idx) => {
+        btn.className = (idx === index) ? activeBtn : inactiveBtn;
+      });
+    }
+
+    // Setup Image Preview Handler
+    function setupImagePreview(inputId, previewId, placeholderId) {
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(previewId);
+      const placeholder = document.getElementById(placeholderId);
+
+      input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            preview.src = evt.target.result;
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+          }
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    setupImagePreview('callProfileInput', 'callImagePreview', 'callUploadPlaceholder');
+    setupImagePreview('smemeMediaInput', 'smemeImagePreview', 'smemeUploadPlaceholder');
+
+    // UI Helper Elements
+    const resultPlaceholder = document.getElementById('resultPlaceholder');
+    const loadingState = document.getElementById('loadingState');
+    const resultContainer = document.getElementById('resultContainer');
+    const resultImage = document.getElementById('resultImage');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const outputBadge = document.getElementById('outputBadge');
+
+    function showLoading() {
+      resultPlaceholder.classList.add('hidden');
+      resultContainer.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      outputBadge.classList.add('hidden');
+    }
+
+    function showResult(blobUrl, filename) {
+      resultImage.src = blobUrl;
+      downloadBtn.href = blobUrl;
+      downloadBtn.download = filename;
+      loadingState.classList.add('hidden');
+      resultContainer.classList.remove('hidden');
+      outputBadge.classList.remove('hidden');
+      showAlertModal("Berhasil!", "Gambar Anda telah berhasil dirender.", "success");
+    }
+
+    function showError(msg) {
+      showAlertModal("Terjadi Kesalahan", "Gagal memproses gambar: " + msg, "error");
+      loadingState.classList.add('hidden');
+      resultPlaceholder.classList.remove('hidden');
+      outputBadge.classList.add('hidden');
+    }
+
+    // Main API Call Fetch Handler
+    async function handleApiCall(url, options = {}, filename = 'canvas-output.jpg') {
+      if (!checkCanGenerate()) return;
+
+      const canProceed = await decrementUserQuota();
+      if (!canProceed) return;
+
+      showLoading();
+      try {
+        const res = await fetch(url, options);
+        if (!res.ok) throw new Error(`HTTP Error Status: ${res.status}`);
+        const blob = await res.blob();
+        if (blob.size === 0) throw new Error("Menerima data gambar kosong dari server.");
+        
+        const imageUrl = URL.createObjectURL(blob);
+        showResult(imageUrl, filename);
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    // 0. Fake Call WA (POST)
+    document.getElementById('fakeCallForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const file = document.getElementById('callProfileInput').files[0];
+      const nama = document.getElementById('callNamaInput').value;
+      const durasi = document.getElementById('callDurasiInput').value;
+
+      if (!file) {
+        showAlertModal("Peringatan", "Harap pilih foto profil terlebih dahulu", "warning");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('profile', file);
+      formData.append('nama', nama);
+      formData.append('durasi', durasi);
+
+      handleApiCall(`https://api.kyzzz.xyz/api/canvas/fake-call?apikey=${API_KEY}`, {
+        method: 'POST',
+        body: formData
+      }, 'fake-call.jpg');
+    });
+
+    // 1. Fake Saldo DANA (GET)
+    document.getElementById('fakeDanaForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const saldo = document.getElementById('danaSaldoInput').value;
+      handleApiCall(`https://api.kyzzz.xyz/api/canvas/fake-dana?saldo=${encodeURIComponent(saldo)}&apikey=${API_KEY}`, {}, `fake-dana-${saldo}.jpg`);
+    });
+
+    // 2. FF Duo (GET)
+    document.getElementById('ffDuoForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const u1 = document.getElementById('ffDuoUser1').value;
+      const u2 = document.getElementById('ffDuoUser2').value;
+      const t = document.getElementById('ffDuoTemplate').value;
+      handleApiCall(`https://api.kyzzz.xyz/api/canvas/ffduo?user1=${encodeURIComponent(u1)}&user2=${encodeURIComponent(u2)}&template=${encodeURIComponent(t)}&apikey=${API_KEY}`, {}, `ff-duo-${u1}-${u2}.jpg`);
+    });
+
+    // 3. FF Girl (GET)
+    document.getElementById('ffGirlForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const user = document.getElementById('ffGirlUser').value;
+      const t = document.getElementById('ffGirlTemplate').value;
+      handleApiCall(`https://api.kyzzz.xyz/api/canvas/ffgirl?username=${encodeURIComponent(user)}&template=${encodeURIComponent(t)}&apikey=${API_KEY}`, {}, `ff-girl-${user}.jpg`);
+    });
+
+    // 4. Fake FF Lobby (GET)
+    document.getElementById('fakeFfLobbyForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const user = document.getElementById('fakeFfUser').value;
+      const lobby = document.getElementById('fakeFfLobby').value;
+      handleApiCall(`https://api.kyzzz.xyz/api/canvas/fake-ff?username=${encodeURIComponent(user)}&lobby=${encodeURIComponent(lobby)}&apikey=${API_KEY}`, {}, `fake-ff-lobby-${user}.jpg`);
+    });
+
+    // 5. Fake GoPay (GET)
+    document.getElementById('fakeGopayForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const saldo = document.getElementById('gopaySaldo').value;
+      const koin = document.getElementById('gopayKoin').value;
+      const terpakai = document.getElementById('gopayTerpakai').value;
+      const bulan = document.getElementById('gopayBulan').value;
+
+      const url = `https://api.kyzzz.xyz/api/canvas/fake-gopay?saldo=${encodeURIComponent(saldo)}&koin=${encodeURIComponent(koin)}&terpakai=${encodeURIComponent(terpakai)}&bulan=${encodeURIComponent(bulan)}&apikey=${API_KEY}`;
+      handleApiCall(url, {}, `fake-gopay-${saldo}.jpg`);
+    });
+
+    // 6. Sticker Meme / Smeme (POST)
+    document.getElementById('smemeForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const media = document.getElementById('smemeMediaInput').files[0];
+      const text1 = document.getElementById('smemeText1').value;
+      const text2 = document.getElementById('smemeText2').value;
+
+      if (!media) {
+        showAlertModal("Peringatan", "Harap pilih gambar meme terlebih dahulu", "warning");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('media', media);
+      formData.append('text1', text1);
+      formData.append('text2', text2);
+
+      handleApiCall(`https://api.kyzzz.xyz/api/maker/smeme?apikey=${API_KEY}`, {
+        method: 'POST',
+        body: formData
+      }, 'sticker-meme.png');
+    });
+
+    // Initialize Animations & User Session on Page Load
+    window.addEventListener('DOMContentLoaded', () => {
+      initBubbles();
+      initUserSession();
+    });
+  </script>
+</body>
+</html>
