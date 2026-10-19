@@ -6,8 +6,8 @@
     <title>CanVas - Studio Generator & Tool Canvas</title>
     
     <!-- Tab Favicon Icon -->
-    <link rel="icon" href="icon.png" type="image/png">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" href="c.png" type="image/png">
+    <link rel="apple-touch-icon" href="c.png">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -136,7 +136,7 @@
             <!-- Header Kiri: Logo + Nama CanVas -->
             <a href="#" class="flex items-center gap-2.5 group">
                 <div class="w-10 h-10 rounded-xl bg-gopay text-white flex items-center justify-center shadow-md shadow-gopay/20 transition-transform group-active:scale-95 overflow-hidden">
-                    <img src="icon.png" alt="CanVas Icon" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='cvs.png'; this.onerror=function(){this.parentElement.innerHTML='<svg class=\'w-6 h-6 fill-current\' viewBox=\'0 0 24 24\'><path d=\'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\'/></svg>';}">
+                    <img src="c.png" alt="CanVas Icon" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='cvs.png'; this.onerror=function(){this.parentElement.innerHTML='<svg class=\'w-6 h-6 fill-current\' viewBox=\'0 0 24 24\'><path d=\'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\'/></svg>';}">
                 </div>
                 <div class="flex flex-col">
                     <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-none">CanVas</span>
@@ -180,7 +180,7 @@
         <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Koleksi Fitur CanVas API</h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pilih generator di bawah. Jumlah pemakaian akan terhubung langsung ke database.</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pilih generator di bawah. Hitungan pemakaian akan terhubung realtime ke Supabase.</p>
             </div>
 
             <!-- Filter Tabs -->
@@ -189,11 +189,11 @@
                 <button onclick="filterCategory('generator')" id="tab-generator" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Generator</button>
                 <button onclick="filterCategory('frame')" id="tab-frame" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Frame & KTP</button>
                 <button onclick="filterCategory('social')" id="tab-social" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Social & Fun</button>
-                <button onclick="filterCategory('tools')" id="tab-tools" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Tools</button>
+                <button onclick="filterCategory('tools')" id="tab-tools" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Tools & Bot</button>
             </div>
         </section>
 
-        <!-- 11 FEATURE CARDS GRID (NILAI BADGE DEFAULT KOSONG) -->
+        <!-- 12 FEATURE CARDS GRID -->
         <section id="features-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
             <!-- 1. Sertifikat Tolol -->
@@ -202,7 +202,6 @@
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-1.5">
                             <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
-                            <!-- Badge Kosong Default -->
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
                                 ⚡ x<span id="use-count-sertifikat-tolol"></span>
                             </span>
@@ -450,6 +449,29 @@
                 </button>
             </div>
 
+            <!-- 12. WA Reaction Bot (NEW) -->
+            <div class="feature-card tools border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-800 uppercase">BOT WA</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-wa-react"></span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            🤖
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">WA Reaction Bot</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Kirim reaksi emoji masal otomatis ke pesan Saluran WhatsApp.</p>
+                </div>
+                <button onclick="openToolModal('wa-react')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+
         </section>
     </main>
 
@@ -495,29 +517,30 @@
             <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-gopay animate-ping"></span>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Hasil Generator</h3>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white" id="result-modal-title">Hasil Generator</h3>
                 </div>
                 <button onclick="closeResultModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-90">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <!-- Image Container -->
-            <div class="p-4 bg-slate-900/10 dark:bg-black/30 flex items-center justify-center min-h-[220px] max-h-[60vh] overflow-auto">
+            <!-- Dynamic Result Container (Image or Code JSON) -->
+            <div class="p-4 bg-slate-900/10 dark:bg-black/30 flex items-center justify-center min-h-[200px] max-h-[60vh] overflow-auto" id="result-body-container">
                 <img id="result-image-preview" src="" alt="Hasil Gambar" class="max-w-full h-auto rounded-xl shadow-md object-contain border border-slate-200 dark:border-slate-700">
+                <pre id="result-json-preview" class="hidden w-full p-4 bg-slate-950 text-emerald-400 font-mono text-xs rounded-xl overflow-x-auto whitespace-pre-wrap border border-slate-800 leading-relaxed"></pre>
             </div>
 
             <!-- Actions Footer -->
-            <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-2" id="result-actions-container">
                 <a id="btn-download-image" href="#" download="canvas-result.png" class="py-2.5 px-3 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 col-span-2 sm:col-span-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     <span>Unduh Gambar</span>
                 </a>
                 <button onclick="copyResultUrl()" class="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 active:scale-95">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                    <span>Salin Link</span>
+                    <span id="btn-copy-label">Salin Link</span>
                 </button>
-                <button onclick="openResultInTab()" class="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 active:scale-95">
+                <button id="btn-open-tab" onclick="openResultInTab()" class="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 active:scale-95">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     <span>Tab Baru</span>
                 </button>
@@ -568,21 +591,22 @@
         </div>
     </footer>
 
-    <!-- JAVASCRIPT & SUPABASE INTEGRATION -->
+    <!-- JAVASCRIPT & REALTIME SUPABASE INTEGRATION -->
     <script>
         const API_KEY = "kyzz73447047341593";
         const SUPABASE_URL = "https://xnbntgxciqvhfzalazeb.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYm50Z3hjaXF2aGZ6YWxhemViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDY1NTAsImV4cCI6MjEwNzcyMjU1MH0.6nP2k8ggFBwLhQRTyTv80y7cDp57_4OblsrpjN1eoko";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYm50Z3hjaXF2aGZ6YWxhemViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDY1NTAsImV4cCI6MjE0NzcyMjU1MH0.6nP2k8ggFBwLhQRTyTv80y7cDp57_4OblsrpjN1eoko";
         
         let supabaseClient = null;
         let activeToolKey = null;
         let currentGeneratedUrl = null;
+        let currentRawJson = null;
 
-        // Semua 11 Fitur IDs
+        // Total 12 Fitur IDs
         const ALL_FEATURE_KEYS = [
             'sertifikat-tolol', 'reminder', 'quote-nokia', 'ffduo', 
             'fake-dana', 'anime-quotes', 'mpls', 'igqc', 'fake-call', 
-            'fake-ktp', 'remove-bg'
+            'fake-ktp', 'remove-bg', 'wa-react'
         ];
 
         // Object penampung hitungan lokal
@@ -636,19 +660,40 @@
             }
         }
 
-        // 2. SUPABASE INTEGRATION & COUNTER LOADING
+        // 2. SUPABASE INTEGRATION & SAFE REALTIME FALLBACK
         function initSupabase() {
             try {
                 if (window.supabase) {
                     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    
+                    // Attempt WebSocket subscription inside try-catch to safely handle Canvas sandbox restrictions
+                    try {
+                        const channel = supabaseClient.channel('realtime_counts');
+                        channel
+                            .on('postgres_changes', { event: '*', schema: 'public', table: 'feature_counts' }, payload => {
+                                if (payload.new && payload.new.feature_id) {
+                                    const fId = payload.new.feature_id;
+                                    const count = payload.new.usage_count || 0;
+                                    localUsageCounts[fId] = count;
+                                    renderBadgeCount(fId, count);
+                                }
+                            })
+                            .subscribe((status, err) => {
+                                if (err || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                                    console.info("WebSocket connection restricted in Canvas preview sandbox. Falling back to HTTP REST mode.");
+                                }
+                            });
+                    } catch (wsErr) {
+                        console.info("WebSocket disabled in preview sandbox, using HTTP REST fallback.");
+                    }
                 }
             } catch (e) {
-                console.warn("Supabase init fallback to LocalStorage");
+                console.warn("Supabase Realtime fallback active.");
             }
         }
 
         async function loadFeatureCounts() {
-            // Ambil data lokal dari localStorage jika ada
+            // Restore data lokal sementara
             const stored = localStorage.getItem('canvas_local_counts');
             if (stored) {
                 try {
@@ -656,14 +701,13 @@
                 } catch(e){}
             }
 
-            // Inisialisasi awal ke UI (jika sudah ada data di local)
             ALL_FEATURE_KEYS.forEach(key => {
                 if (localUsageCounts[key] !== undefined) {
                     renderBadgeCount(key, localUsageCounts[key]);
                 }
             });
 
-            // Ambil data terbaru dari Supabase secara asinkron
+            // Ambil dari Supabase
             if (supabaseClient) {
                 try {
                     const { data, error } = await supabaseClient
@@ -680,7 +724,7 @@
                         localStorage.setItem('canvas_local_counts', JSON.stringify(localUsageCounts));
                     }
                 } catch (e) {
-                    console.warn("Gagal mengambil data dari Supabase, menggunakan cache lokal.");
+                    console.warn("Menggunakan penyimpanan cache lokal.");
                 }
             }
         }
@@ -695,19 +739,18 @@
         function incrementUsage(featureId) {
             if (!featureId) return;
 
-            // 1. Langsung update UI lokal (+1) secara instan tanpa menunggu network
+            // Update UI secara instan (+1)
             const current = localUsageCounts[featureId] || 0;
             const updated = current + 1;
             localUsageCounts[featureId] = updated;
             renderBadgeCount(featureId, updated);
             localStorage.setItem('canvas_local_counts', JSON.stringify(localUsageCounts));
 
-            // 2. Kirim update ke Supabase di background (non-blocking)
+            // Kirim ke database Supabase
             if (supabaseClient) {
                 supabaseClient.rpc('increment_feature_count', { f_id: featureId })
                     .then(({ data, error }) => {
                         if (error || data === null) {
-                            // Jika RPC belum ada, fallback ke upsert standar
                             return supabaseClient.from('feature_counts').upsert({
                                 feature_id: featureId,
                                 usage_count: updated
@@ -717,7 +760,7 @@
                             renderBadgeCount(featureId, data);
                         }
                     })
-                    .catch(err => console.warn('Gagal sinkronisasi Supabase:', err));
+                    .catch(err => console.warn('Supabase update background task:', err));
             }
         }
 
@@ -1022,6 +1065,24 @@
                         <input type="file" id="input-file-image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gopay-light file:text-gopay">
                     </div>
                 `;
+            } else if (key === 'wa-react') {
+                title = "WA Reaction Bot";
+                subtitle = "API POST - WhatsApp Reaction";
+                iconEl.innerHTML = `🤖`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">API Key BotWA</label>
+                        <input type="text" id="input-wa-apikey" value="821578875bc6366ad59c98dec6478797" class="${inputStyle}">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">URL Pesan Saluran WhatsApp</label>
+                        <input type="text" id="input-wa-url" value="https://whatsapp.com/channel/0029VbAvsS01NCrMBZVTP40j/977" placeholder="https://whatsapp.com/channel/..." class="${inputStyle}">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Emoji (Pisahkan dengan koma)</label>
+                        <input type="text" id="input-wa-emojis" value="👍,❤️,😂,😮,😢" class="${inputStyle}">
+                    </div>
+                `;
             }
 
             titleEl.textContent = title;
@@ -1064,13 +1125,13 @@
         async function submitActiveTool() {
             if (!activeToolKey) return;
 
-            // Increment usage lokal & kirim update ke Supabase secara instan
+            // Increment usage lokal & update Supabase
             incrementUsage(activeToolKey);
 
             showNotification({
                 type: 'loading',
-                title: 'Memproses Gambar...',
-                message: 'Mohon tunggu sejenak, gambar sedang di-generate.'
+                title: 'Memproses Request...',
+                message: 'Mohon tunggu sejenak, data sedang diproses server.'
             });
 
             try {
@@ -1212,31 +1273,63 @@
                     const targetUrl = `https://api.kyzzz.xyz/api/tools/remove-bg?apikey=${API_KEY}`;
                     await processPostFormData(targetUrl, formData);
                 }
+                else if (activeToolKey === 'wa-react') {
+                    const waApikey = document.getElementById('input-wa-apikey').value.trim();
+                    const waUrl = document.getElementById('input-wa-url').value.trim();
+                    const waEmojis = document.getElementById('input-wa-emojis').value.trim();
+
+                    if (!waUrl) {
+                        hideNotification();
+                        showNotification({
+                            type: 'warning',
+                            title: 'URL Kosong',
+                            message: 'Masukkan URL pesan saluran WhatsApp.'
+                        });
+                        return;
+                    }
+
+                    const payload = {
+                        apikey: waApikey,
+                        url: waUrl,
+                        emojis: waEmojis
+                    };
+
+                    const res = await fetch('https://react.botwa.net/api/react', {
+                        method: 'POST',
+                        headers: {
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const jsonResult = await res.json();
+                    closeToolModal();
+                    hideNotification();
+                    openResultJsonModal(jsonResult);
+                }
             } catch (err) {
                 hideNotification();
                 showNotification({
                     type: 'error',
                     title: 'Gagal Memproses',
-                    message: 'Terjadi masalah jaringan saat menghubungi API.'
+                    message: 'Terjadi masalah saat mengirim request ke server API.'
                 });
             }
         }
 
-        // Processing GET Image Endpoint (Pencegah Macet / Freeze)
+        // Processing GET Image Endpoint
         async function processDirectImageUrl(url) {
             try {
-                // Preload image using Image object
                 const img = new Image();
                 img.crossOrigin = "anonymous";
                 
                 const loadPromise = new Promise((resolve, reject) => {
                     img.onload = () => resolve(url);
-                    img.onerror = () => reject(new Error("Gagal memuat hasil gambar"));
+                    img.onerror = () => reject(new Error("Gagal memuat gambar"));
                 });
 
                 img.src = url;
 
-                // Timeout 15 Detik
                 const timeoutPromise = new Promise((_, reject) => 
                     setTimeout(() => reject(new Error("Waktu tunggu API habis (Timeout)")), 15000)
                 );
@@ -1245,25 +1338,24 @@
 
                 closeToolModal();
                 hideNotification();
-                openResultModal(finalUrl);
+                openResultImageModal(finalUrl);
 
             } catch (e) {
-                // Fallback attempt dengan fetch Blob jika Image CORS ketat
                 try {
                     const res = await fetch(url);
-                    if (!res.ok) throw new Error("Gagal mengambil respon gambar");
+                    if (!res.ok) throw new Error("Gagal mengambil gambar");
                     const blob = await res.blob();
                     const objectUrl = URL.createObjectURL(blob);
                     
                     closeToolModal();
                     hideNotification();
-                    openResultModal(objectUrl);
+                    openResultImageModal(objectUrl);
                 } catch(errFetch) {
                     hideNotification();
                     showNotification({
                         type: 'error',
                         title: 'Gagal Memuat Gambar',
-                        message: 'API tidak merespon atau parameter yang dimasukkan tidak valid.'
+                        message: 'API tidak merespon atau parameter yang dimasukkan salah.'
                     });
                 }
             }
@@ -1273,7 +1365,7 @@
         async function processPostFormData(url, formData) {
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+                const timeoutId = setTimeout(() => controller.abort(), 20000);
 
                 const res = await fetch(url, {
                     method: 'POST',
@@ -1295,7 +1387,7 @@
                         const resultUrl = jsonRes.url || jsonRes.result;
                         closeToolModal();
                         hideNotification();
-                        openResultModal(resultUrl);
+                        openResultImageModal(resultUrl);
                         return;
                     }
                 }
@@ -1305,7 +1397,7 @@
 
                 closeToolModal();
                 hideNotification();
-                openResultModal(objectUrl);
+                openResultImageModal(objectUrl);
 
             } catch (e) {
                 hideNotification();
@@ -1317,15 +1409,28 @@
             }
         }
 
-        // Result Modal Display
-        function openResultModal(imageUrl) {
+        // Result Modal Displays (Image & JSON)
+        function openResultImageModal(imageUrl) {
             currentGeneratedUrl = imageUrl;
+            currentRawJson = null;
+
             const modal = document.getElementById('result-modal');
             const imgPreview = document.getElementById('result-image-preview');
+            const jsonPreview = document.getElementById('result-json-preview');
             const downloadBtn = document.getElementById('btn-download-image');
+            const copyLabel = document.getElementById('btn-copy-label');
+            const openTabBtn = document.getElementById('btn-open-tab');
+            const modalTitle = document.getElementById('result-modal-title');
+
+            modalTitle.textContent = "Hasil Generator Gambar";
+            imgPreview.classList.remove('hidden');
+            jsonPreview.classList.add('hidden');
+            downloadBtn.classList.remove('hidden');
+            openTabBtn.classList.remove('hidden');
 
             imgPreview.src = imageUrl;
             downloadBtn.href = imageUrl;
+            copyLabel.textContent = "Salin Link";
 
             modal.classList.remove('hidden-modal');
             modal.classList.add('show-modal');
@@ -1333,7 +1438,39 @@
             showNotification({
                 type: 'success',
                 title: 'Berhasil!',
-                message: 'Gambar berhasil dibuat dan dicatat.',
+                message: 'Proses selesai dan angka pemakaian tercatat.',
+                autoClose: 2000
+            });
+        }
+
+        function openResultJsonModal(jsonData) {
+            currentRawJson = JSON.stringify(jsonData, null, 2);
+            currentGeneratedUrl = null;
+
+            const modal = document.getElementById('result-modal');
+            const imgPreview = document.getElementById('result-image-preview');
+            const jsonPreview = document.getElementById('result-json-preview');
+            const downloadBtn = document.getElementById('btn-download-image');
+            const copyLabel = document.getElementById('btn-copy-label');
+            const openTabBtn = document.getElementById('btn-open-tab');
+            const modalTitle = document.getElementById('result-modal-title');
+
+            modalTitle.textContent = "Hasil Respon Bot WA";
+            imgPreview.classList.add('hidden');
+            jsonPreview.classList.remove('hidden');
+            downloadBtn.classList.add('hidden');
+            openTabBtn.classList.add('hidden');
+
+            jsonPreview.textContent = currentRawJson;
+            copyLabel.textContent = "Salin JSON";
+
+            modal.classList.remove('hidden-modal');
+            modal.classList.add('show-modal');
+
+            showNotification({
+                type: 'success',
+                title: 'Request Berhasil!',
+                message: 'Reaksi bot WA berhasil dikirim ke server.',
                 autoClose: 2000
             });
         }
@@ -1345,9 +1482,17 @@
         }
 
         function copyResultUrl() {
-            if (!currentGeneratedUrl) return;
-            const tempInput = document.createElement('input');
-            tempInput.value = currentGeneratedUrl;
+            let copyText = "";
+            if (currentRawJson) {
+                copyText = currentRawJson;
+            } else if (currentGeneratedUrl) {
+                copyText = currentGeneratedUrl;
+            } else {
+                return;
+            }
+
+            const tempInput = document.createElement('textarea');
+            tempInput.value = copyText;
             document.body.appendChild(tempInput);
             tempInput.select();
             document.execCommand('copy');
@@ -1356,7 +1501,7 @@
             showNotification({
                 type: 'success',
                 title: 'Tersalin!',
-                message: 'Link gambar berhasil disalin ke clipboard.',
+                message: currentRawJson ? 'Data JSON berhasil disalin.' : 'Link gambar berhasil disalin ke clipboard.',
                 autoClose: 2000
             });
         }
