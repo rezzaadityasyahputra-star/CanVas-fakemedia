@@ -1,1359 +1,1307 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full">
+<html lang="id" class="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CanVas - Multi Canvas Generator Suite</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CanVas - Studio Generator & Tool Canvas</title>
+    <!-- Tab Icon / Favicon -->
+    <link rel="icon" href="icon.png" type="image/png">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Supabase JS SDK v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Google Fonts: Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Supabase JS Client CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              DEFAULT: '#16A34A',
-              hover: '#15803D',
-              active: '#166534',
-              light: '#DCFCE7',
-              border: '#BBF7D0',
-              text: '#171717'
+    <!-- Custom Tailwind Configuration with Dark Mode Support -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gopay: {
+                            DEFAULT: '#00A86B',
+                            hover: '#00955E',
+                            light: '#E6F7F0',
+                            dark: '#007A4E',
+                            darkbg: '#003823'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif']
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  </script>
+    </script>
 
-  <style>
-    /* Reset & Tap Highlight */
-    * {
-      -webkit-tap-highlight-color: transparent;
-      box-sizing: border-box;
-    }
+    <!-- Global CSS Guardrails & Custom Animations -->
+    <style>
+        /* DISABLE BLUE TAP HIGHLIGHT ON MOBILE DEVICES */
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            user-select: none;
+        }
 
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      color: #171717;
-      background-color: #ffffff;
-    }
+        input, textarea, select, [contenteditable="true"] {
+            user-select: text !important;
+        }
 
-    /* Custom Focus Outline for Accessibility */
-    *:focus-visible {
-      outline: 2px solid #16A34A;
-      outline-offset: 2px;
-    }
+        button:focus, input:focus, select:focus, textarea:focus {
+            outline: none !important;
+        }
 
-    /* Prevent Text Selection on Buttons & Interactive Elements */
-    button, label, .tab-pill, .no-select {
-      user-select: none;
-      -webkit-user-select: none;
-    }
+        .focus-ring:focus {
+            box-shadow: 0 0 0 2px rgba(0, 168, 107, 0.25);
+            border-color: #00A86B !important;
+        }
 
-    /* Custom Scrollbar for Nav Tabs */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+        /* Custom smooth scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.03);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 9999px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
 
-    /* Tab Slide Transitions */
-    .tab-slide-container {
-      display: flex;
-      width: 700%; /* 7 Fitur */
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+        /* Modal transitions */
+        .modal-overlay {
+            transition: opacity 0.25s ease-in-out;
+        }
+        .modal-card {
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-in-out;
+        }
+        .modal-overlay.hidden-modal {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-overlay.hidden-modal .modal-card {
+            transform: scale(0.92) translateY(10px);
+            opacity: 0;
+        }
+        .modal-overlay.show-modal {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-overlay.show-modal .modal-card {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
 
-    .tab-slide-item {
-      width: 14.285714%; /* 100% / 7 */
-      flex-shrink: 0;
-      opacity: 0.2;
-      transform: scale(0.98);
-      transition: opacity 0.35s ease, transform 0.35s ease;
-      pointer-events: none;
-    }
+        /* Smooth Theme Switch */
+        body, header, section, div, card, modal {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
 
-    .tab-slide-item.active-slide {
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: auto;
-    }
-
-    /* Floating Animated Background Bubbles */
-    .bubble-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .bubble {
-      position: absolute;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(220, 252, 231, 0.4));
-      border: 1px solid rgba(187, 247, 208, 0.5);
-      box-shadow: 0 8px 32px 0 rgba(22, 163, 74, 0.06);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      animation: floatUp 18s infinite linear;
-    }
-
-    @keyframes floatUp {
-      0% {
-        transform: translateY(105vh) translateX(0) rotate(0deg);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.7;
-      }
-      90% {
-        opacity: 0.7;
-      }
-      100% {
-        transform: translateY(-15vh) translateX(50px) rotate(360deg);
-        opacity: 0;
-      }
-    }
-
-    /* Ripple Animation for Buttons */
-    .ripple-btn {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .ripple-effect {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.35);
-      transform: scale(0);
-      animation: rippleAnim 0.5s linear;
-      pointer-events: none;
-    }
-
-    @keyframes rippleAnim {
-      to {
-        transform: scale(4);
-        opacity: 0;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .bubble, .tab-slide-container, .tab-slide-item {
-        animation: none !important;
-        transition: none !important;
-      }
-    }
-  </style>
+        @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
 </head>
-<body class="min-h-full flex flex-col justify-between relative bg-white text-neutral-900 antialiased selection:bg-green-100 selection:text-green-800">
+<body class="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-gopay-light selection:text-gopay">
 
-  <!-- Floating Background Bubbles -->
-  <div class="bubble-container" id="bubbleContainer"></div>
+    <!-- HEADER / NAVBAR -->
+    <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shadow-xs">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            
+            <!-- Left: Logo "cvs.png" + Brand Name "CanVas" -->
+            <a href="#" class="flex items-center gap-2.5 group">
+                <div class="w-10 h-10 rounded-xl bg-gopay text-white flex items-center justify-center shadow-md shadow-gopay/20 transition-transform group-active:scale-95 overflow-hidden">
+                    <img src="cvs.png" alt="CanVas Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='icon.png'; this.onerror=function(){this.parentElement.innerHTML='<svg class=\'w-6 h-6 fill-current\' viewBox=\'0 0 24 24\'><path d=\'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5\'/></svg>';}">
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-none">CanVas</span>
+                    <span class="text-[10px] font-semibold text-gopay tracking-wider uppercase mt-0.5">Studio Generator</span>
+                </div>
+            </a>
 
-  <!-- Main Wrapper -->
-  <div class="relative z-10 flex flex-col min-h-screen">
+            <!-- Right: Light / Dark Mode Toggle Switcher -->
+            <button id="theme-toggle-btn" onclick="toggleDarkMode()" aria-label="Toggle Theme" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition active:scale-90 flex items-center gap-2 text-xs font-bold border border-slate-200 dark:border-slate-700">
+                <!-- Sun Icon for Dark Mode (click to go light) -->
+                <svg id="icon-sun" class="w-4 h-4 hidden text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1z" clip-rule="evenodd"/>
+                </svg>
+                <!-- Moon Icon for Light Mode (click to go dark) -->
+                <svg id="icon-moon" class="w-4 h-4 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                </svg>
+                <span id="theme-label-text" class="hidden sm:inline">Theme</span>
+            </button>
 
-    <!-- Header -->
-    <header class="bg-white/90 backdrop-blur-md border-b border-neutral-100 sticky top-0 z-40 transition-all">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-          <!-- Logo CVS dengan Fallback Ikon -->
-          <div class="w-10 h-10 rounded-xl bg-green-600 text-white flex items-center justify-center shadow-md shadow-green-600/20 overflow-hidden">
-            <img src="cvs.png" alt="CanVas Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-            <i class="fa-solid fa-paintbrush text-lg hidden"></i>
-          </div>
-          <div>
-            <h1 class="text-lg font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
-              CanVas Suite
-            </h1>
-            <p class="text-[11px] text-neutral-500 font-medium -mt-0.5">Multi Generator Tool</p>
-          </div>
         </div>
-
-        <!-- Profil & Kuota User Trigger -->
-        <div class="flex items-center">
-          <button id="profileBtn" onclick="openProfileModal()" class="ripple-btn flex items-center space-x-2 text-xs font-semibold text-green-800 bg-green-50 hover:bg-green-100/80 px-3.5 py-1.5 rounded-full border border-green-200/80 shadow-sm transition-all active:scale-95">
-            <i class="fa-solid fa-circle-user text-base text-green-600"></i>
-            <span id="headerUserText" class="truncate max-w-[100px]">Masuk</span>
-            <span id="headerQuotaBadge" class="bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5">2/2</span>
-          </button>
-        </div>
-      </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 w-full flex-grow">
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-4 sm:py-6 flex flex-col gap-6">
 
-      <!-- Tab Navigation Slider -->
-      <div class="overflow-x-auto no-scrollbar mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div class="flex space-x-1.5 bg-neutral-100/80 p-1.5 rounded-2xl border border-neutral-200/70 min-w-[660px]">
-          <button id="tabBtn-0" onclick="goToTab(0)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-green-600 text-white shadow-sm shadow-green-600/30">
-            <i class="fa-solid fa-phone text-xs"></i>
-            <span>Fake Call</span>
-          </button>
-          <button id="tabBtn-1" onclick="goToTab(1)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
-            <i class="fa-solid fa-wallet text-xs"></i>
-            <span>Fake DANA</span>
-          </button>
-          <button id="tabBtn-2" onclick="goToTab(2)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
-            <i class="fa-solid fa-gamepad text-xs"></i>
-            <span>FF Duo</span>
-          </button>
-          <button id="tabBtn-3" onclick="goToTab(3)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
-            <i class="fa-solid fa-user-ninja text-xs"></i>
-            <span>FF Girl</span>
-          </button>
-          <button id="tabBtn-4" onclick="goToTab(4)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
-            <i class="fa-solid fa-users-viewfinder text-xs"></i>
-            <span>FF Lobby</span>
-          </button>
-          <button id="tabBtn-5" onclick="goToTab(5)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
-            <i class="fa-solid fa-credit-card text-xs"></i>
-            <span>Fake GoPay</span>
-          </button>
-          <button id="tabBtn-6" onclick="goToTab(6)" class="tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60">
-            <i class="fa-solid fa-face-laugh-squint text-xs"></i>
-            <span>Sticker Meme</span>
-          </button>
-        </div>
-      </div>
+        <!-- THUMBNAIL BANNER (YT 16:9 WIDESCREEN RATIO) -->
+        <section class="w-full">
+            <div class="w-full rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm bg-slate-50 dark:bg-slate-800 relative group">
+                <!-- 16:9 YouTube Widescreen Aspect Ratio -->
+                <img 
+                    src="cvs.png" 
+                    alt="CanVas Banner Header" 
+                    class="w-full object-cover aspect-video rounded-2xl transition-transform duration-500 group-hover:scale-[1.01]"
+                    onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'1280\' height=\'720\' viewBox=\'0 0 1280 720\' fill=\'none\'><rect width=\'1280\' height=\'720\' fill=\'%2300A86B\'/><path d=\'M0 0L1280 720H0V0Z\' fill=\'%2300B86B\' opacity=\'0.3\'/><text x=\'50%25\' y=\'45%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'white\' font-family=\'Plus Jakarta Sans, sans-serif\' font-size=\'48\' font-weight=\'800\'>CanVas Studio Generator</text><text x=\'50%25\' y=\'58%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'rgba(255,255,255,0.88)\' font-family=\'Plus Jakarta Sans, sans-serif\' font-size=\'22\'>11 Tool %26 Generator Canvas API</text></svg>'"
+                >
+            </div>
+        </section>
 
-      <!-- Layout Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- TITLE & CATEGORY FILTER TABS -->
+        <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Koleksi Fitur CanVas API</h1>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Pilih generator untuk memproses gambar. Setiap penggunaan tercatat di database.</p>
+            </div>
 
-        <!-- Panel Left: Input Form Slider -->
-        <div class="lg:col-span-7 bg-white border border-neutral-200/80 rounded-2xl p-5 sm:p-6 shadow-xl shadow-neutral-100/80 backdrop-blur-sm overflow-hidden">
+            <!-- Filter Category Buttons -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                <button onclick="filterCategory('all')" id="tab-all" class="filter-tab active-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-gopay text-white shadow-sm">Semua Fitur</button>
+                <button onclick="filterCategory('generator')" id="tab-generator" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Generator</button>
+                <button onclick="filterCategory('frame')" id="tab-frame" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Frame & Card</button>
+                <button onclick="filterCategory('social')" id="tab-social" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Social & Fun</button>
+                <button onclick="filterCategory('tools')" id="tab-tools" class="filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700">Tools</button>
+            </div>
+        </section>
 
-          <div id="tabSlideContainer" class="tab-slide-container">
+        <!-- ALL 11 FEATURE CARDS GRID WITH USAGE COUNTER (x10) -->
+        <section id="features-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-            <!-- 0. Fake Call WA -->
-            <div class="tab-slide-item active-slide pr-2">
-              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
-                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                  <i class="fa-solid fa-phone text-sm"></i>
-                </div>
+            <!-- 1. Sertifikat Tolol -->
+            <div class="feature-card generator border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
                 <div>
-                  <h2 class="text-base font-bold text-neutral-900">Fake Call WhatsApp</h2>
-                  <p class="text-xs text-neutral-500">Buat tangkapan layar panggilan WA palsu</p>
-                </div>
-              </div>
-
-              <form id="fakeCallForm" class="space-y-4">
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Foto Profil Panggilan</label>
-                  <label for="callProfileInput" class="flex flex-col items-center justify-center w-full h-28 border-2 border-neutral-200 border-dashed rounded-xl cursor-pointer bg-neutral-50/50 hover:bg-green-50/30 hover:border-green-500 transition-all overflow-hidden relative group">
-                    <div id="callUploadPlaceholder" class="flex flex-col items-center justify-center py-4 text-center px-2">
-                      <div class="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-400 group-hover:text-green-600 mb-1 shadow-sm transition-colors">
-                        <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
-                      </div>
-                      <p class="text-xs text-neutral-600"><span class="font-semibold text-green-600">Klik untuk unggah</span> foto profil</p>
-                      <p class="text-[10px] text-neutral-400 mt-0.5">PNG, JPG atau JPEG</p>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
+                            <!-- Usage Badge Counter -->
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-sertifikat">10</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            📜
+                        </div>
                     </div>
-                    <img id="callImagePreview" class="hidden absolute inset-0 h-full w-full object-cover" alt="Preview">
-                    <input id="callProfileInput" type="file" accept="image/*" class="hidden" />
-                  </label>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Sertifikat Tolol</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Buat sertifikat humoristis kustom dengan nama pilihamu.</p>
                 </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Nama / Kontak</label>
-                  <input type="text" id="callNamaInput" placeholder="my heart ❤️" required
-                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Durasi Panggilan</label>
-                  <input type="text" id="callDurasiInput" value="01:00:39" required
-                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                </div>
-
-                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                  <span>Buat Fake Call</span>
+                <button onclick="openToolModal('sertifikat')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </button>
-              </form>
             </div>
 
-            <!-- 1. Fake Saldo DANA -->
-            <div class="tab-slide-item px-2">
-              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
-                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                  <i class="fa-solid fa-wallet text-sm"></i>
-                </div>
+            <!-- 2. Reminder Generator -->
+            <div class="feature-card generator border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
                 <div>
-                  <h2 class="text-base font-bold text-neutral-900">Fake Saldo DANA</h2>
-                  <p class="text-xs text-neutral-500">Generasi tampilan dompet digital DANA</p>
-                </div>
-              </div>
-
-              <form id="fakeDanaForm" class="space-y-4">
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Jumlah Saldo (Rp)</label>
-                  <div class="relative">
-                    <span class="absolute left-3.5 top-2.5 text-neutral-500 font-semibold text-sm">Rp</span>
-                    <input type="number" id="danaSaldoInput" value="150000" min="0" required
-                      class="w-full bg-white border border-neutral-200 rounded-xl pl-10 pr-3.5 py-2.5 text-sm text-neutral-900 font-semibold focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-xs font-medium text-neutral-500 mb-2">Pilih Nominal Cepat:</label>
-                  <div class="grid grid-cols-3 gap-2">
-                    <button type="button" onclick="setDanaSaldo(50000)" class="ripple-btn bg-neutral-50 border border-neutral-200 hover:border-green-500 hover:bg-green-50/50 rounded-lg py-2 text-xs font-semibold text-neutral-700 transition-all">50 Ribu</button>
-                    <button type="button" onclick="setDanaSaldo(500000)" class="ripple-btn bg-neutral-50 border border-neutral-200 hover:border-green-500 hover:bg-green-50/50 rounded-lg py-2 text-xs font-semibold text-neutral-700 transition-all">500 Ribu</button>
-                    <button type="button" onclick="setDanaSaldo(2500000)" class="ripple-btn bg-neutral-50 border border-neutral-200 hover:border-green-500 hover:bg-green-50/50 rounded-lg py-2 text-xs font-semibold text-neutral-700 transition-all">2.5 Juta</button>
-                  </div>
-                </div>
-
-                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                  <span>Buat Fake DANA</span>
-                </button>
-              </form>
-            </div>
-
-            <!-- 2. Free Fire Duo -->
-            <div class="tab-slide-item px-2">
-              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
-                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                  <i class="fa-solid fa-gamepad text-sm"></i>
-                </div>
-                <div>
-                  <h2 class="text-base font-bold text-neutral-900">Free Fire Duo</h2>
-                  <p class="text-xs text-neutral-500">Banner pasangan game Free Fire</p>
-                </div>
-              </div>
-
-              <form id="ffDuoForm" class="space-y-4">
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Nama Pemain 1</label>
-                  <input type="text" id="ffDuoUser1" placeholder="Athar" required
-                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Nama Pemain 2</label>
-                  <input type="text" id="ffDuoUser2" placeholder="Rina" required
-                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Desain Template</label>
-                  <select id="ffDuoTemplate" class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                    <option value="random">Acak (Random)</option>
-                    <option value="1">Template 1</option>
-                    <option value="2">Template 2</option>
-                    <option value="3">Template 3</option>
-                  </select>
-                </div>
-
-                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                  <span>Buat FF Duo</span>
-                </button>
-              </form>
-            </div>
-
-            <!-- 3. Free Fire Girl -->
-            <div class="tab-slide-item px-2">
-              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
-                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                  <i class="fa-solid fa-user-ninja text-sm"></i>
-                </div>
-                <div>
-                  <h2 class="text-base font-bold text-neutral-900">Free Fire Girl</h2>
-                  <p class="text-xs text-neutral-500">Banner karakter cewek FF custom</p>
-                </div>
-              </div>
-
-              <form id="ffGirlForm" class="space-y-4">
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Username / Nickname</label>
-                  <input type="text" id="ffGirlUser" placeholder="Athar" required
-                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Desain Template</label>
-                  <select id="ffGirlTemplate" class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                    <option value="random">Acak (Random)</option>
-                    <option value="1">Template 1</option>
-                    <option value="2">Template 2</option>
-                    <option value="3">Template 3</option>
-                  </select>
-                </div>
-
-                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                  <span>Buat FF Girl Canvas</span>
-                </button>
-              </form>
-            </div>
-
-            <!-- 4. Fake FF Lobby -->
-            <div class="tab-slide-item px-2">
-              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
-                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                  <i class="fa-solid fa-users-viewfinder text-sm"></i>
-                </div>
-                <div>
-                  <h2 class="text-base font-bold text-neutral-900">Fake FF Lobby</h2>
-                  <p class="text-xs text-neutral-500">Simulasi tampilan lobby game FF</p>
-                </div>
-              </div>
-
-              <form id="fakeFfLobbyForm" class="space-y-4">
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Username Utama</label>
-                  <input type="text" id="fakeFfUser" placeholder="kyzz" required
-                    class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1">Jumlah Orang di Lobby</label>
-                  <select id="fakeFfLobby" class="w-full bg-white border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                    <option value="1">1 Orang (Solo)</option>
-                    <option value="2">2 Orang (Duo)</option>
-                    <option value="3">3 Orang</option>
-                    <option value="4">4 Orang (Squad)</option>
-                    <option value="5" selected>5 Orang (Full Squad)</option>
-                  </select>
-                </div>
-
-                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                  <span>Buat Fake FF Lobby</span>
-                </button>
-              </form>
-            </div>
-
-            <!-- 5. Fake GoPay -->
-            <div class="tab-slide-item px-2">
-              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
-                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                  <i class="fa-solid fa-credit-card text-sm"></i>
-                </div>
-                <div>
-                  <h2 class="text-base font-bold text-neutral-900">Fake GoPay Status</h2>
-                  <p class="text-xs text-neutral-500">Ringkasan saldo & transaksi GoPay</p>
-                </div>
-              </div>
-
-              <form id="fakeGopayForm" class="space-y-4">
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Saldo GoPay (Rp)</label>
-                    <input type="number" id="gopaySaldo" value="890000" required
-                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 font-semibold focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Jumlah Koin</label>
-                    <input type="number" id="gopayKoin" value="159" required
-                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Terpakai (Rp)</label>
-                    <input type="number" id="gopayTerpakai" value="50000" required
-                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Nama Bulan</label>
-                    <input type="text" id="gopayBulan" value="Mei" required
-                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                  </div>
-                </div>
-
-                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                  <span>Buat Fake GoPay</span>
-                </button>
-              </form>
-            </div>
-
-            <!-- 6. Sticker Meme / Smeme -->
-            <div class="tab-slide-item pl-2">
-              <div class="flex items-center space-x-2.5 mb-5 border-b border-neutral-100 pb-3">
-                <div class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                  <i class="fa-solid fa-face-laugh-squint text-sm"></i>
-                </div>
-                <div>
-                  <h2 class="text-base font-bold text-neutral-900">Sticker Meme Generator</h2>
-                  <p class="text-xs text-neutral-500">Tambahkan teks meme pada gambar pilihan Anda</p>
-                </div>
-              </div>
-
-              <form id="smemeForm" class="space-y-4">
-                <div>
-                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Gambar Meme</label>
-                  <label for="smemeMediaInput" class="flex flex-col items-center justify-center w-full h-24 border-2 border-neutral-200 border-dashed rounded-xl cursor-pointer bg-neutral-50/50 hover:bg-green-50/30 hover:border-green-500 transition-all overflow-hidden relative group">
-                    <div id="smemeUploadPlaceholder" class="flex flex-col items-center justify-center py-2 text-center px-2">
-                      <i class="fa-solid fa-image text-base text-neutral-400 group-hover:text-green-600 mb-1 transition-colors"></i>
-                      <p class="text-xs text-neutral-600"><span class="font-semibold text-green-600">Pilih Gambar</span> untuk meme</p>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-reminder">15</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            ⏰
+                        </div>
                     </div>
-                    <img id="smemeImagePreview" class="hidden absolute inset-0 h-full w-full object-cover" alt="Preview">
-                    <input id="smemeMediaInput" type="file" accept="image/*" class="hidden" />
-                  </label>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Reminder Text</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Pengingat aesthetic dengan sorotan teks [kurung siku].</p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Teks Atas (Text 1)</label>
-                    <input type="text" id="smemeText1" placeholder="Hai" required
-                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                  </div>
-                  <div>
-                    <label class="block text-xs font-semibold text-neutral-700 mb-1">Teks Bawah (Text 2)</label>
-                    <input type="text" id="smemeText2" placeholder="Cantik"
-                      class="w-full bg-white border border-neutral-200 rounded-xl px-3 py-2 text-sm text-neutral-900 focus:outline-none focus:border-green-600 focus:ring-1 focus:ring-green-600 transition-all">
-                  </div>
-                </div>
-
-                <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                  <span>Buat Sticker Meme</span>
+                <button onclick="openToolModal('reminder')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                 </button>
-              </form>
             </div>
 
-          </div>
-
-        </div>
-
-        <!-- Panel Right: Output View -->
-        <div class="lg:col-span-5 bg-white border border-neutral-200/80 rounded-2xl p-6 shadow-xl shadow-neutral-100/80 backdrop-blur-sm flex flex-col items-center justify-center min-h-[420px] transition-all relative">
-
-          <div class="w-full flex items-center justify-between mb-4 border-b border-neutral-100 pb-3">
-            <h2 class="text-sm font-bold text-neutral-800 flex items-center">
-              <i class="fa-regular fa-image text-green-600 mr-2"></i> Hasil Output Canvas
-            </h2>
-            <span id="outputBadge" class="hidden text-[10px] font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Selesai</span>
-          </div>
-
-          <!-- Initial Empty Placeholder -->
-          <div id="resultPlaceholder" class="text-center py-10 px-4 flex flex-col items-center my-auto">
-            <div class="w-16 h-16 bg-neutral-100 border border-neutral-200 rounded-2xl flex items-center justify-center text-neutral-400 mb-3 shadow-inner">
-              <i class="fa-regular fa-images text-2xl"></i>
-            </div>
-            <h3 class="text-sm font-semibold text-neutral-700 mb-1">Belum Ada Hasil</h3>
-            <p class="text-xs text-neutral-500 max-w-[220px]">Isi formulir di sebelah kiri dan tekan tombol buat untuk melihat preview.</p>
-          </div>
-
-          <!-- Loading State Spinner -->
-          <div id="loadingState" class="hidden text-center py-12 flex flex-col items-center my-auto">
-            <div class="relative w-12 h-12 mb-4">
-              <div class="absolute inset-0 rounded-full border-4 border-green-100"></div>
-              <div class="absolute inset-0 rounded-full border-4 border-green-600 border-t-transparent animate-spin"></div>
-            </div>
-            <p class="text-sm font-semibold text-neutral-800">Sedang Memproses...</p>
-            <p class="text-xs text-neutral-500 mt-1">Sistem sedang merender gambar Anda</p>
-          </div>
-
-          <!-- Result Image Display Container -->
-          <div id="resultContainer" class="hidden w-full flex flex-col items-center space-y-4 my-auto">
-            <div class="relative group rounded-xl overflow-hidden border border-neutral-200/80 max-w-[290px] sm:max-w-[320px] shadow-lg bg-neutral-50">
-              <img id="resultImage" class="w-full h-auto object-contain max-h-[380px] transition-transform duration-300 group-hover:scale-[1.02]" alt="Result Image">
+            <!-- 3. Quote Nokia -->
+            <div class="feature-card generator border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-quote-nokia">8</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            📱
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Quote Nokia</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Pesan teks bergaya tampilan layar HP Nokia retro monokrom.</p>
+                </div>
+                <button onclick="openToolModal('quote-nokia')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
             </div>
 
-            <a id="downloadBtn" href="#" target="_blank" download="canvas-result.jpg"
-              class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white text-center py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-              <i class="fa-solid fa-download"></i>
-              <span>Unduh Gambar Tampilan</span>
-            </a>
-          </div>
+            <!-- 4. Free Fire Duo -->
+            <div class="feature-card social border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-ffduo">18</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            🎮
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Free Fire Duo</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Banner duo gaming Free Fire dengan 2 nama kustom.</p>
+                </div>
+                <button onclick="openToolModal('ffduo')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
 
-        </div>
+            <!-- 5. Fake DANA Saldo -->
+            <div class="feature-card generator border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-fake-dana">27</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            💸
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Fake DANA Saldo</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Tampilan saldo dompet digital DANA kustom.</p>
+                </div>
+                <button onclick="openToolModal('fake-dana')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
 
-      </div>
+            <!-- 6. Anime Quotes -->
+            <div class="feature-card social border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 uppercase">GET</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-anime-quotes">9</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            ⛩️
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Anime Quotes</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Kartu kutipan karakter anime dengan latar kustom.</p>
+                </div>
+                <button onclick="openToolModal('anime-quotes')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+
+            <!-- 7. Frame MPLS -->
+            <div class="feature-card frame border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase">POST</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-mpls">12</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            🖼️
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Frame MPLS</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Gabungkan foto diri ke dalam twibbon bingkai MPLS.</p>
+                </div>
+                <button onclick="openToolModal('mpls')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+
+            <!-- 8. IG Quote Card -->
+            <div class="feature-card frame border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase">POST</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-igqc">20</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            💬
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">IG Quote Card (IGQC)</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Kartu kutipan story Instagram lengkap dengan avatar.</p>
+                </div>
+                <button onclick="openToolModal('igqc')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+
+            <!-- 9. Fake Call Screen -->
+            <div class="feature-card social border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase">POST</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-fake-call">14</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            📞
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Fake Call Screen</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Mockup panggilan telepon masuk lengkap dengan foto profil.</p>
+                </div>
+                <button onclick="openToolModal('fake-call')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+
+            <!-- 10. Fake KTP Generator -->
+            <div class="feature-card generator border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase">POST</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-fake-ktp">34</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            🪪
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Fake KTP Generator</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Simulasi gambar KTP Indonesia dengan identitas lengkap.</p>
+                </div>
+                <button onclick="openToolModal('fake-ktp')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+
+            <!-- 11. Remove Background -->
+            <div class="feature-card tools border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 bg-white dark:bg-slate-800/80 hover:border-gopay/50 dark:hover:border-gopay/50 hover:shadow-lg transition duration-200 flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-400 border border-purple-200 dark:border-purple-800 uppercase">TOOLS</span>
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                                ⚡ x<span id="use-count-remove-bg">45</span>
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center group-hover:bg-gopay-light group-hover:text-gopay transition">
+                            ✂️
+                        </div>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-gopay transition">Remove Background</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">Hapus latar belakang foto otomatis menggunakan AI Remover.</p>
+                </div>
+                <button onclick="openToolModal('remove-bg')" class="mt-5 w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition duration-150 flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98]">
+                    <span>Gunakan Fitur</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+
+        </section>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-neutral-100 bg-white py-4 text-center text-xs text-neutral-500 mt-auto">
-      <p>&copy; 2026 Rezza CanVas Web App. All rights reserved.</p>
+    <!-- INTERACTIVE TOOL FORM MODAL -->
+    <div id="tool-form-modal" class="modal-overlay hidden-modal fixed inset-0 z-40 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="modal-card bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-2xl w-full max-w-lg my-auto relative overflow-hidden max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+                <div class="flex items-center gap-2.5">
+                    <div id="modal-tool-icon" class="w-8 h-8 rounded-lg bg-gopay-light dark:bg-gopay-darkbg text-gopay flex items-center justify-center font-bold">
+                        <!-- Icon -->
+                    </div>
+                    <div>
+                        <h3 id="modal-tool-title" class="text-base font-bold text-slate-900 dark:text-white leading-tight">Form Input</h3>
+                        <p id="modal-tool-subtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Lengkapi parameter di bawah</p>
+                    </div>
+                </div>
+                <button onclick="closeToolModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-90">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Modal Form Body -->
+            <div class="p-5 overflow-y-auto space-y-4 flex-1 text-slate-800 dark:text-slate-200" id="modal-form-container">
+                <!-- Dynamic Inputs -->
+            </div>
+
+            <!-- Modal Form Footer -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
+                <button type="button" onclick="closeToolModal()" class="w-1/3 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition active:scale-95">Batal</button>
+                <button type="button" id="btn-submit-tool" onclick="submitActiveTool()" class="w-2/3 py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white font-bold text-xs transition shadow-md shadow-gopay/20 flex items-center justify-center gap-2 active:scale-95">
+                    <span>Generate Sekarang (x1)</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULT PREVIEW MODAL -->
+    <div id="result-modal" class="modal-overlay hidden-modal fixed inset-0 z-40 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="modal-card bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-2xl w-full max-w-lg my-auto relative overflow-hidden flex flex-col">
+            <!-- Header -->
+            <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-gopay animate-ping"></span>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Hasil Generator</h3>
+                </div>
+                <button onclick="closeResultModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-90">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Image Container -->
+            <div class="p-4 bg-slate-900/10 dark:bg-black/30 flex items-center justify-center min-h-[220px] max-h-[60vh] overflow-auto">
+                <img id="result-image-preview" src="" alt="Hasil Gambar" class="max-w-full h-auto rounded-xl shadow-md object-contain border border-slate-200 dark:border-slate-700">
+            </div>
+
+            <!-- Actions Footer -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <a id="btn-download-image" href="#" download="canvas-result.png" class="py-2.5 px-3 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 col-span-2 sm:col-span-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span>Unduh</span>
+                </a>
+                <button onclick="copyResultUrl()" class="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 active:scale-95">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                    <span>Salin Link</span>
+                </button>
+                <button onclick="openResultInTab()" class="py-2.5 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 active:scale-95">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <span>Tab Baru</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MANDATORY: CUSTOM CENTER MODAL NOTIFICATION SYSTEM -->
+    <div id="custom-notification-overlay" class="modal-overlay hidden-modal fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="modal-card bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-700 max-w-xs sm:max-w-sm w-full relative text-center flex flex-col items-center">
+            
+            <!-- Close Button X -->
+            <button onclick="hideNotification()" class="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 flex items-center justify-center transition active:scale-90">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <!-- Dynamic Icon Container -->
+            <div id="notif-icon-container" class="w-14 h-14 rounded-2xl mb-4 flex items-center justify-center shadow-inner">
+                <!-- Icon loaded by JS -->
+            </div>
+
+            <!-- Dynamic Title -->
+            <h3 id="notif-title" class="text-base font-bold text-slate-900 dark:text-white mb-1">Notifikasi</h3>
+
+            <!-- Dynamic Message -->
+            <p id="notif-message" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">Pesan deskripsi informasi.</p>
+
+            <!-- Action Button -->
+            <button id="notif-btn" onclick="hideNotification()" class="w-full py-2.5 px-4 rounded-xl bg-gopay hover:bg-gopay-hover text-white text-xs font-bold transition active:scale-95 shadow-xs">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 py-6 px-4">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-md bg-gopay text-white flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">CanVas Studio</span>
+            </div>
+            
+            <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                With bt rezza , api by kyz
+            </p>
+        </div>
     </footer>
 
-  </div>
-
-  <!-- MODAL: LOGIN / REGISTER -->
-  <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden opacity-0 transition-all duration-300">
-    <div class="bg-white rounded-2xl border border-neutral-200/80 shadow-2xl w-full max-w-sm p-6 m-4 relative transform scale-95 transition-all duration-300">
-      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 p-1">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-
-      <!-- Auth Tab Switcher -->
-      <div id="authTabs" class="flex border-b border-neutral-100 mb-5">
-        <button id="tabLoginBtn" onclick="switchAuthMode('login')" class="flex-1 pb-2.5 text-center text-sm font-bold text-green-600 border-b-2 border-green-600 transition-all">Login</button>
-        <button id="tabRegisterBtn" onclick="switchAuthMode('register')" class="flex-1 pb-2.5 text-center text-sm font-bold text-neutral-400 hover:text-neutral-700 transition-all">Daftar</button>
-      </div>
-
-      <!-- Logged Out View: Form Login -->
-      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-semibold text-neutral-700 mb-1">Username / Email</label>
-          <input type="text" id="loginUser" placeholder="Masukkan username" required class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 transition-all">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-neutral-700 mb-1">Password</label>
-          <input type="password" id="loginPass" placeholder="••••••••" required class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 transition-all">
-        </div>
-        <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-green-600/20">
-          Masuk Sekarang
-        </button>
-      </form>
-
-      <!-- Logged Out View: Form Daftar -->
-      <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="space-y-4 hidden">
-        <div>
-          <label class="block text-xs font-semibold text-neutral-700 mb-1">Username</label>
-          <input type="text" id="regUser" placeholder="Username baru" required class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 transition-all">
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-neutral-700 mb-1">Password</label>
-          <input type="password" id="regPass" placeholder="••••••••" required class="w-full bg-neutral-50 border border-neutral-200 rounded-xl px-3.5 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-green-600 transition-all">
-        </div>
-        <button type="submit" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all shadow-md shadow-green-600/20">
-          Buat Akun Gratis
-        </button>
-      </form>
-
-      <!-- Logged In Profile Card View -->
-      <div id="loggedInView" class="hidden text-center py-2 space-y-4">
-        <div class="w-16 h-16 rounded-full bg-green-100 text-green-600 border-2 border-green-200 flex items-center justify-center mx-auto text-2xl shadow-sm">
-          <i class="fa-solid fa-user-check"></i>
-        </div>
-        <div>
-          <h3 id="loggedInUsername" class="text-base font-bold text-neutral-900">User</h3>
-          <p class="text-xs text-green-600 font-semibold bg-green-50 inline-block px-2.5 py-0.5 rounded-full border border-green-200 mt-1">Akses Gratis Tanpa Batas</p>
-        </div>
-        <button onclick="handleLogout()" class="ripple-btn w-full bg-neutral-100 hover:bg-neutral-200 active:scale-[0.98] text-neutral-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition-all flex items-center justify-center space-x-2">
-          <i class="fa-solid fa-right-from-bracket text-red-500"></i>
-          <span>Keluar (Logout)</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: NOTIFIKASI KESEMPATAN HABIS (DITENGAH LAYAR) -->
-  <div id="quotaExceededModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden opacity-0 transition-all duration-300">
-    <div class="bg-white rounded-2xl border border-neutral-200/80 shadow-2xl w-full max-w-sm p-6 m-4 text-center transform scale-95 transition-all duration-300">
-      <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-amber-200">
-        <i class="fa-solid fa-lock text-2xl"></i>
-      </div>
-      <h3 class="text-base font-bold text-neutral-900 mb-2">Akses Terbatas</h3>
-      <p class="text-xs text-neutral-600 mb-6 leading-relaxed font-medium">
-        Maaf, Kesempatan anda telah habis, silahkan login untuk menikmati CanVas kami secara gratis.
-      </p>
-      <div class="space-y-2">
-        <button onclick="closeQuotaModalAndOpenLogin()" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-3 px-4 rounded-xl text-xs sm:text-sm transition-all shadow-md shadow-green-600/20 flex items-center justify-center space-x-2">
-          <i class="fa-solid fa-right-to-bracket text-xs"></i>
-          <span>Login Sekarang</span>
-        </button>
-        <button onclick="closeQuotaModal()" class="w-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 font-semibold py-2 px-4 rounded-xl text-xs transition-all">
-          Tutup
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: NOTIFIKASI UMUM & ERROR (DITENGAH DENGAN TOMBOL X) -->
-  <div id="alertModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden opacity-0 transition-all duration-300">
-    <div class="bg-white rounded-2xl border border-neutral-200/80 shadow-2xl w-full max-w-sm p-6 m-4 relative transform scale-95 transition-all duration-300 text-center">
-      <!-- Tombol X Close -->
-      <button onclick="closeAlertModal()" class="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 p-1.5 rounded-lg hover:bg-neutral-100 transition-colors">
-        <i class="fa-solid fa-xmark text-lg"></i>
-      </button>
-
-      <!-- Dynamic Icon Container -->
-      <div id="alertIconContainer" class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-neutral-200">
-        <i class="fa-solid fa-circle-info text-2xl"></i>
-      </div>
-
-      <h3 id="alertTitle" class="text-base font-bold text-neutral-900 mb-2">Notifikasi</h3>
-      <p id="alertMessage" class="text-xs text-neutral-600 mb-6 leading-relaxed font-medium break-words">
-        Pesan informasi sistem.
-      </p>
-
-      <button onclick="closeAlertModal()" class="ripple-btn w-full bg-green-600 hover:bg-green-700 active:scale-[0.98] text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all shadow-md shadow-green-600/20">
-        Tutup
-      </button>
-    </div>
-  </div>
-
-  <!-- JavaScript Application Logic -->
-  <script>
-    // System Constants
-    const API_KEY = "kyzz73447047341593";
-    let currentTabIndex = 0;
-
-    // Supabase Initialization
-    const SUPABASE_URL = "https://xnbntgxciqvhfzalazeb.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYm50Z3hjaXF2aGZ6YWxhemViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDY1NTAsImV4cCI6MjEwNzcyMjU1MH0.6nP2k8ggFBwLhQRTyTv80y7cDp57_4OblsrpjN1eoko";
-    const supabaseClient = (window.supabase && window.supabase.createClient) 
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
-      : null;
-
-    // State Management for Auth & Quota
-    const MAX_GUEST_QUOTA = 2;
-    let isLoggedIn = false;
-    let currentUser = null;
-    let activeQuotaChannel = null;
-
-    // SUPABASE REALTIME QUOTA SUBSCRIBER
-    const subscribeRealtimeQuota = (idUserAktif) => {
-      if (!supabaseClient || !idUserAktif) return;
-
-      // Unsubscribe jika sudah ada channel aktif sebelumnya
-      if (activeQuotaChannel) {
-        supabaseClient.removeChannel(activeQuotaChannel);
-      }
-
-      activeQuotaChannel = supabaseClient
-        .channel(`realtime_status_kuota_${idUserAktif}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'user_quotas',
-            filter: `id=eq.${idUserAktif}`
-          },
-          (payload) => {
-            const dataBaru = payload.new;
-            console.log("Ada Update Kuota Realtime:", dataBaru);
-
-            // Update UI Badge sisa kuota
-            const remQuota = Math.max(0, dataBaru.quota_limit - dataBaru.quota_used);
-            const badge = document.getElementById('headerQuotaBadge');
-            if (badge) {
-              badge.innerText = `${remQuota}/${dataBaru.quota_limit}`;
-              if (dataBaru.is_expired || remQuota <= 0) {
-                badge.className = "bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
-              } else {
-                badge.className = "bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
-              }
-            }
-
-            // DETEKSI REALTIME: Jika kuota habis (is_expired atau sisa = 0)
-            if (dataBaru.is_expired || dataBaru.quota_used >= dataBaru.quota_limit) {
-              // Tutup loading/hasil, kemudian buka modal pembatas
-              if (typeof closeAlertModal === "function") closeAlertModal();
-              openQuotaModal(); // Membuka modal "Akses Terbatas / Kesempatan Habis"
-            }
-          }
-        )
-        .subscribe();
-    };
-
-    // Ambil Data Kuota Awal Pengguna dari Supabase
-    async function fetchUserQuota(userId) {
-      if (!supabaseClient || !userId) return;
-      try {
-        const { data, error } = await supabaseClient
-          .from('user_quotas')
-          .select('*')
-          .eq('id', userId)
-          .single();
-
-        if (data && !error) {
-          const remQuota = Math.max(0, data.quota_limit - data.quota_used);
-          const badge = document.getElementById('headerQuotaBadge');
-          if (badge) {
-            badge.innerText = `${remQuota}/${data.quota_limit}`;
-            if (data.is_expired || remQuota <= 0) {
-              badge.className = "bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
-            } else {
-              badge.className = "bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
-            }
-          }
-
-          if (data.is_expired || remQuota <= 0) {
-            openQuotaModal();
-          }
-        }
-      } catch (err) {
-        console.error("Gagal mengambil data kuota:", err);
-      }
-    }
-
-    // Initialize User Session & Guest Quota
-    async function initUserSession() {
-      const savedUser = localStorage.getItem('canvas_user');
-      if (savedUser) {
-        isLoggedIn = true;
-        currentUser = JSON.parse(savedUser);
-        if (currentUser.id) {
-          await fetchUserQuota(currentUser.id);
-          subscribeRealtimeQuota(currentUser.id);
-        }
-      }
-      updateAuthUI();
-    }
-
-    function getRemainingQuota() {
-      const used = parseInt(localStorage.getItem('canvas_guest_uses') || '0');
-      return Math.max(0, MAX_GUEST_QUOTA - used);
-    }
-
-    function updateAuthUI() {
-      const headerUserText = document.getElementById('headerUserText');
-      const headerQuotaBadge = document.getElementById('headerQuotaBadge');
-
-      if (isLoggedIn && currentUser) {
-        headerUserText.innerText = currentUser.username;
-        if (!currentUser.id) {
-          headerQuotaBadge.className = "bg-green-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-0.5";
-          headerQuotaBadge.innerText = "VIP";
-        }
-      } else {
-        const rem = getRemainingQuota();
-        headerUserText.innerText = "Masuk";
-        if (rem > 0) {
-          headerQuotaBadge.className = "bg-green-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
-        } else {
-          headerQuotaBadge.className = "bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold ml-0.5";
-        }
-        headerQuotaBadge.innerText = `${rem}/${MAX_GUEST_QUOTA}`;
-      }
-    }
-
-    // Modal Profile Control Logic
-    function openProfileModal() {
-      const modal = document.getElementById('authModal');
-      const card = modal.querySelector('div');
-      
-      const loginForm = document.getElementById('loginForm');
-      const registerForm = document.getElementById('registerForm');
-      const loggedInView = document.getElementById('loggedInView');
-      const authTabs = document.getElementById('authTabs');
-
-      if (isLoggedIn && currentUser) {
-        loginForm.classList.add('hidden');
-        registerForm.classList.add('hidden');
-        authTabs.classList.add('hidden');
-        loggedInView.classList.remove('hidden');
-        document.getElementById('loggedInUsername').innerText = currentUser.username;
-      } else {
-        loggedInView.classList.add('hidden');
-        authTabs.classList.remove('hidden');
-        switchAuthMode('login');
-      }
-
-      modal.classList.remove('hidden');
-      setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        card.classList.remove('scale-95');
-      }, 10);
-    }
-
-    function closeAuthModal() {
-      const modal = document.getElementById('authModal');
-      const card = modal.querySelector('div');
-      modal.classList.add('opacity-0');
-      card.classList.add('scale-95');
-      setTimeout(() => {
-        modal.classList.add('hidden');
-      }, 300);
-    }
-
-    function switchAuthMode(mode) {
-      const loginForm = document.getElementById('loginForm');
-      const registerForm = document.getElementById('registerForm');
-      const tabLoginBtn = document.getElementById('tabLoginBtn');
-      const tabRegisterBtn = document.getElementById('tabRegisterBtn');
-
-      if (mode === 'login') {
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-        tabLoginBtn.className = "flex-1 pb-2.5 text-center text-sm font-bold text-green-600 border-b-2 border-green-600 transition-all";
-        tabRegisterBtn.className = "flex-1 pb-2.5 text-center text-sm font-bold text-neutral-400 hover:text-neutral-700 transition-all";
-      } else {
-        loginForm.classList.add('hidden');
-        registerForm.classList.remove('hidden');
-        tabRegisterBtn.className = "flex-1 pb-2.5 text-center text-sm font-bold text-green-600 border-b-2 border-green-600 transition-all";
-        tabLoginBtn.className = "flex-1 pb-2.5 text-center text-sm font-bold text-neutral-400 hover:text-neutral-700 transition-all";
-      }
-    }
-
-    // Auth Submit with Supabase Integration
-    async function handleLoginSubmit(e) {
-      e.preventDefault();
-      const userVal = document.getElementById('loginUser').value.trim();
-      const passVal = document.getElementById('loginPass').value.trim();
-      if (!userVal || !passVal) return;
-
-      if (supabaseClient) {
-        const email = userVal.includes('@') ? userVal : `${userVal.toLowerCase().replace(/\s+/g, '')}@canvas.app`;
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email: email,
-          password: passVal
-        });
-
-        if (!error && data?.user) {
-          isLoggedIn = true;
-          currentUser = { 
-            id: data.user.id, 
-            username: data.user.user_metadata?.username || userVal, 
-            email: data.user.email 
-          };
-          localStorage.setItem('canvas_user', JSON.stringify(currentUser));
-          updateAuthUI();
-          closeAuthModal();
-          
-          // Sinkronisasi realtime & kuota
-          await fetchUserQuota(currentUser.id);
-          subscribeRealtimeQuota(currentUser.id);
-
-          showAlertModal("Berhasil Login", `Selamat datang kembali, ${currentUser.username}!`, "success");
-          return;
-        }
-      }
-
-      // Fallback Local Storage User
-      isLoggedIn = true;
-      currentUser = { username: userVal };
-      localStorage.setItem('canvas_user', JSON.stringify(currentUser));
-      updateAuthUI();
-      closeAuthModal();
-      showAlertModal("Berhasil Login", `Selamat datang kembali, ${userVal}!`, "success");
-    }
-
-    async function handleRegisterSubmit(e) {
-      e.preventDefault();
-      const userVal = document.getElementById('regUser').value.trim();
-      const passVal = document.getElementById('regPass').value.trim();
-      if (!userVal || !passVal) return;
-
-      if (supabaseClient) {
-        const email = userVal.includes('@') ? userVal : `${userVal.toLowerCase().replace(/\s+/g, '')}@canvas.app`;
-        const { data, error } = await supabaseClient.auth.signUp({
-          email: email,
-          password: passVal,
-          options: { data: { username: userVal } }
-        });
-
-        if (!error && data?.user) {
-          isLoggedIn = true;
-          currentUser = { id: data.user.id, username: userVal, email: email };
-          localStorage.setItem('canvas_user', JSON.stringify(currentUser));
-          updateAuthUI();
-          closeAuthModal();
-
-          // Sinkronisasi realtime & kuota
-          await fetchUserQuota(currentUser.id);
-          subscribeRealtimeQuota(currentUser.id);
-
-          showAlertModal("Registrasi Berhasil", `Akun berhasil dibuat! Selamat datang, ${userVal}.`, "success");
-          return;
-        }
-      }
-
-      // Fallback Local Storage User
-      isLoggedIn = true;
-      currentUser = { username: userVal };
-      localStorage.setItem('canvas_user', JSON.stringify(currentUser));
-      updateAuthUI();
-      closeAuthModal();
-      showAlertModal("Registrasi Berhasil", `Akun berhasil dibuat! Selamat datang, ${userVal}.`, "success");
-    }
-
-    function handleLogout() {
-      if (supabaseClient) {
-        supabaseClient.auth.signOut();
-        if (activeQuotaChannel) {
-          supabaseClient.removeChannel(activeQuotaChannel);
-          activeQuotaChannel = null;
-        }
-      }
-      isLoggedIn = false;
-      currentUser = null;
-      localStorage.removeItem('canvas_user');
-      updateAuthUI();
-      closeAuthModal();
-      showAlertModal("Informasi", "Berhasil keluar dari akun.", "info");
-    }
-
-    // Quota Limit Modal Functions
-    function openQuotaModal() {
-      const modal = document.getElementById('quotaExceededModal');
-      const card = modal.querySelector('div');
-      modal.classList.remove('hidden');
-      setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        card.classList.remove('scale-95');
-      }, 10);
-    }
-
-    function closeQuotaModal() {
-      const modal = document.getElementById('quotaExceededModal');
-      const card = modal.querySelector('div');
-      modal.classList.add('opacity-0');
-      card.classList.add('scale-95');
-      setTimeout(() => {
-        modal.classList.add('hidden');
-      }, 300);
-    }
-
-    function closeQuotaModalAndOpenLogin() {
-      closeQuotaModal();
-      setTimeout(() => {
-        openProfileModal();
-      }, 300);
-    }
-
-    // Centered Alert Modal System
-    function showAlertModal(title, message, type = 'info') {
-      const modal = document.getElementById('alertModal');
-      const card = modal.querySelector('div');
-      const iconContainer = document.getElementById('alertIconContainer');
-      const titleEl = document.getElementById('alertTitle');
-      const msgEl = document.getElementById('alertMessage');
-
-      titleEl.innerText = title;
-      msgEl.innerText = message;
-
-      if (type === 'error') {
-        iconContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-100 text-red-600 border border-red-200 shadow-sm";
-        iconContainer.innerHTML = '<i class="fa-solid fa-circle-exclamation text-2xl"></i>';
-      } else if (type === 'success') {
-        iconContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-green-100 text-green-600 border border-green-200 shadow-sm";
-        iconContainer.innerHTML = '<i class="fa-solid fa-circle-check text-2xl"></i>';
-      } else if (type === 'warning') {
-        iconContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-100 text-amber-600 border border-amber-200 shadow-sm";
-        iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-2xl"></i>';
-      } else {
-        iconContainer.className = "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-blue-100 text-blue-600 border border-blue-200 shadow-sm";
-        iconContainer.innerHTML = '<i class="fa-solid fa-circle-info text-2xl"></i>';
-      }
-
-      modal.classList.remove('hidden');
-      setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        card.classList.remove('scale-95');
-      }, 10);
-    }
-
-    function closeAlertModal() {
-      const modal = document.getElementById('alertModal');
-      const card = modal.querySelector('div');
-      modal.classList.add('opacity-0');
-      card.classList.add('scale-95');
-      setTimeout(() => {
-        modal.classList.add('hidden');
-      }, 300);
-    }
-
-    function checkCanGenerate() {
-      if (isLoggedIn) return true;
-      const rem = getRemainingQuota();
-      if (rem <= 0) {
-        openQuotaModal();
-        return false;
-      }
-      return true;
-    }
-
-    // Potong kuota pengguna (Guest atau Supabase User)
-    async function decrementUserQuota() {
-      if (!isLoggedIn || !currentUser?.id || !supabaseClient) {
-        decrementGuestQuota();
-        return true;
-      }
-
-      try {
-        const { data, error } = await supabaseClient.rpc('use_user_quota', {
-          user_id: currentUser.id,
-          amount: 1
-        });
-
-        if (error || (data && !data.success)) {
-          if (data && data.is_expired) {
-            openQuotaModal();
-          } else {
-            showAlertModal("Batas Kuota", data?.message || "Masa kuota Anda telah habis.", "warning");
-          }
-          return false;
-        }
-        return true;
-      } catch (err) {
-        console.error("Gagal update kuota RPC:", err);
-        return true;
-      }
-    }
-
-    function decrementGuestQuota() {
-      if (isLoggedIn) return;
-      let used = parseInt(localStorage.getItem('canvas_guest_uses') || '0');
-      used += 1;
-      localStorage.setItem('canvas_guest_uses', used.toString());
-      updateAuthUI();
-    }
-
-    // Set Dana Saldo Helper
-    function setDanaSaldo(value) {
-      document.getElementById('danaSaldoInput').value = value;
-    }
-
-    // Background Bubble Generator
-    function initBubbles() {
-      const container = document.getElementById('bubbleContainer');
-      const count = 10;
-      for (let i = 0; i < count; i++) {
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        const size = Math.random() * 60 + 20; // 20px - 80px
-        bubble.style.width = `${size}px`;
-        bubble.style.height = `${size}px`;
-        bubble.style.left = `${Math.random() * 95}%`;
-        bubble.style.animationDuration = `${Math.random() * 12 + 14}s`; // 14s - 26s
-        bubble.style.animationDelay = `${Math.random() * 8}s`;
-        container.appendChild(bubble);
-      }
-    }
-
-    // Ripple Effect Logic
-    document.addEventListener('click', function(e) {
-      const btn = e.target.closest('.ripple-btn');
-      if (btn) {
-        const rect = btn.getBoundingClientRect();
-        const circle = document.createElement('span');
-        const diameter = Math.max(rect.width, rect.height);
-        const radius = diameter / 2;
-
-        circle.style.width = circle.style.height = `${diameter}px`;
-        circle.style.left = `${e.clientX - rect.left - radius}px`;
-        circle.style.top = `${e.clientY - rect.top - radius}px`;
-        circle.classList.add('ripple-effect');
-
-        const existing = btn.getElementsByClassName('ripple-effect')[0];
-        if (existing) existing.remove();
-
-        btn.appendChild(circle);
-      }
-    });
-
-    // Slide Switcher Function
-    function goToTab(index) {
-      currentTabIndex = index;
-      const container = document.getElementById('tabSlideContainer');
-      const items = document.querySelectorAll('.tab-slide-item');
-      const buttons = document.querySelectorAll('.tab-pill');
-
-      // Slide container offset
-      container.style.transform = `translateX(-${index * 14.285714}%)`;
-
-      // Update Opacity & Scale
-      items.forEach((item, idx) => {
-        if (idx === index) {
-          item.classList.add('active-slide');
-        } else {
-          item.classList.remove('active-slide');
-        }
-      });
-
-      // Button Styles
-      const activeBtn = "tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 bg-green-600 text-white shadow-sm shadow-green-600/30";
-      const inactiveBtn = "tab-pill flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center justify-center space-x-2 text-neutral-600 hover:text-neutral-900 hover:bg-white/60";
-
-      buttons.forEach((btn, idx) => {
-        btn.className = (idx === index) ? activeBtn : inactiveBtn;
-      });
-    }
-
-    // Setup Image Preview Handler
-    function setupImagePreview(inputId, previewId, placeholderId) {
-      const input = document.getElementById(inputId);
-      const preview = document.getElementById(previewId);
-      const placeholder = document.getElementById(placeholderId);
-
-      input.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-            preview.src = evt.target.result;
-            preview.classList.remove('hidden');
-            placeholder.classList.add('hidden');
-          }
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-
-    setupImagePreview('callProfileInput', 'callImagePreview', 'callUploadPlaceholder');
-    setupImagePreview('smemeMediaInput', 'smemeImagePreview', 'smemeUploadPlaceholder');
-
-    // UI Helper Elements
-    const resultPlaceholder = document.getElementById('resultPlaceholder');
-    const loadingState = document.getElementById('loadingState');
-    const resultContainer = document.getElementById('resultContainer');
-    const resultImage = document.getElementById('resultImage');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const outputBadge = document.getElementById('outputBadge');
-
-    function showLoading() {
-      resultPlaceholder.classList.add('hidden');
-      resultContainer.classList.add('hidden');
-      loadingState.classList.remove('hidden');
-      outputBadge.classList.add('hidden');
-    }
-
-    function showResult(blobUrl, filename) {
-      resultImage.src = blobUrl;
-      downloadBtn.href = blobUrl;
-      downloadBtn.download = filename;
-      loadingState.classList.add('hidden');
-      resultContainer.classList.remove('hidden');
-      outputBadge.classList.remove('hidden');
-      showAlertModal("Berhasil!", "Gambar Anda telah berhasil dirender.", "success");
-    }
-
-    function showError(msg) {
-      showAlertModal("Terjadi Kesalahan", "Gagal memproses gambar: " + msg, "error");
-      loadingState.classList.add('hidden');
-      resultPlaceholder.classList.remove('hidden');
-      outputBadge.classList.add('hidden');
-    }
-
-    // Main API Call Fetch Handler
-    async function handleApiCall(url, options = {}, filename = 'canvas-output.jpg') {
-      if (!checkCanGenerate()) return;
-
-      const canProceed = await decrementUserQuota();
-      if (!canProceed) return;
-
-      showLoading();
-      try {
-        const res = await fetch(url, options);
-        if (!res.ok) throw new Error(`HTTP Error Status: ${res.status}`);
-        const blob = await res.blob();
-        if (blob.size === 0) throw new Error("Menerima data gambar kosong dari server.");
+    <!-- JAVASCRIPT & SUPABASE INTEGRATION -->
+    <script>
+        const API_KEY = "kyzz73447047341593";
+        const SUPABASE_URL = "https://xnbntgxciqvhfzalazeb.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYm50Z3hjaXF2aGZ6YWxhemViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNDY1NTAsImV4cCI6MjEwNzcyMjU1MH0.6nP2k8ggFBwLhQRTyTv80y7cDp57_4OblsrpjN1eoko";
         
-        const imageUrl = URL.createObjectURL(blob);
-        showResult(imageUrl, filename);
-      } catch (err) {
-        showError(err.message);
-      }
-    }
+        let supabaseClient = null;
+        let activeToolKey = null;
+        let currentGeneratedUrl = null;
 
-    // 0. Fake Call WA (POST)
-    document.getElementById('fakeCallForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const file = document.getElementById('callProfileInput').files[0];
-      const nama = document.getElementById('callNamaInput').value;
-      const durasi = document.getElementById('callDurasiInput').value;
+        // Default local usage counter initial state
+        const featureUsageData = {
+            sertifikat: 10,
+            reminder: 15,
+            'quote-nokia': 8,
+            mpls: 12,
+            igqc: 20,
+            'fake-ktp': 34,
+            'remove-bg': 45,
+            ffduo: 18,
+            'fake-dana': 27,
+            'fake-call': 14,
+            'anime-quotes': 9
+        };
 
-      if (!file) {
-        showAlertModal("Peringatan", "Harap pilih foto profil terlebih dahulu", "warning");
-        return;
-      }
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initSupabase();
+            loadFeatureUsage();
+        });
 
-      const formData = new FormData();
-      formData.append('profile', file);
-      formData.append('nama', nama);
-      formData.append('durasi', durasi);
+        // 1. LIGHT / DARK MODE TOGGLE
+        function initTheme() {
+            const savedTheme = localStorage.getItem('canvas_theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                updateThemeIcons(true);
+            } else {
+                document.documentElement.classList.add('light');
+                document.documentElement.classList.remove('dark');
+                updateThemeIcons(false);
+            }
+        }
 
-      handleApiCall(`https://api.kyzzz.xyz/api/canvas/fake-call?apikey=${API_KEY}`, {
-        method: 'POST',
-        body: formData
-      }, 'fake-call.jpg');
-    });
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                localStorage.setItem('canvas_theme', 'light');
+                updateThemeIcons(false);
+            } else {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+                localStorage.setItem('canvas_theme', 'dark');
+                updateThemeIcons(true);
+            }
+        }
 
-    // 1. Fake Saldo DANA (GET)
-    document.getElementById('fakeDanaForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const saldo = document.getElementById('danaSaldoInput').value;
-      handleApiCall(`https://api.kyzzz.xyz/api/canvas/fake-dana?saldo=${encodeURIComponent(saldo)}&apikey=${API_KEY}`, {}, `fake-dana-${saldo}.jpg`);
-    });
+        function updateThemeIcons(isDark) {
+            const sunIcon = document.getElementById('icon-sun');
+            const moonIcon = document.getElementById('icon-moon');
+            if (isDark) {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        }
 
-    // 2. FF Duo (GET)
-    document.getElementById('ffDuoForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const u1 = document.getElementById('ffDuoUser1').value;
-      const u2 = document.getElementById('ffDuoUser2').value;
-      const t = document.getElementById('ffDuoTemplate').value;
-      handleApiCall(`https://api.kyzzz.xyz/api/canvas/ffduo?user1=${encodeURIComponent(u1)}&user2=${encodeURIComponent(u2)}&template=${encodeURIComponent(t)}&apikey=${API_KEY}`, {}, `ff-duo-${u1}-${u2}.jpg`);
-    });
+        // 2. SUPABASE SDK & USAGE COUNTER MANAGER
+        function initSupabase() {
+            try {
+                if (window.supabase) {
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                }
+            } catch (e) {
+                console.log("Supabase init fallback to LocalStorage");
+            }
+        }
 
-    // 3. FF Girl (GET)
-    document.getElementById('ffGirlForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const user = document.getElementById('ffGirlUser').value;
-      const t = document.getElementById('ffGirlTemplate').value;
-      handleApiCall(`https://api.kyzzz.xyz/api/canvas/ffgirl?username=${encodeURIComponent(user)}&template=${encodeURIComponent(t)}&apikey=${API_KEY}`, {}, `ff-girl-${user}.jpg`);
-    });
+        async function loadFeatureUsage() {
+            // Restore from localStorage first
+            const localStored = localStorage.getItem('canvas_usage_cache');
+            if (localStored) {
+                try {
+                    const parsed = JSON.parse(localStored);
+                    Object.assign(featureUsageData, parsed);
+                } catch(e) {}
+            }
 
-    // 4. Fake FF Lobby (GET)
-    document.getElementById('fakeFfLobbyForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const user = document.getElementById('fakeFfUser').value;
-      const lobby = document.getElementById('fakeFfLobby').value;
-      handleApiCall(`https://api.kyzzz.xyz/api/canvas/fake-ff?username=${encodeURIComponent(user)}&lobby=${encodeURIComponent(lobby)}&apikey=${API_KEY}`, {}, `fake-ff-lobby-${user}.jpg`);
-    });
+            // Try fetching real counts from Supabase database
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient.from('canvas_usage').select('feature_key, use_count');
+                    if (data && !error && data.length > 0) {
+                        data.forEach(item => {
+                            if (item.feature_key && item.use_count !== undefined) {
+                                featureUsageData[item.feature_key] = item.use_count;
+                            }
+                        });
+                        localStorage.setItem('canvas_usage_cache', JSON.stringify(featureUsageData));
+                    }
+                } catch(e) {
+                    // Fallback seamlessly
+                }
+            }
 
-    // 5. Fake GoPay (GET)
-    document.getElementById('fakeGopayForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const saldo = document.getElementById('gopaySaldo').value;
-      const koin = document.getElementById('gopayKoin').value;
-      const terpakai = document.getElementById('gopayTerpakai').value;
-      const bulan = document.getElementById('gopayBulan').value;
+            // Render counters to UI badges
+            updateUsageUI();
+        }
 
-      const url = `https://api.kyzzz.xyz/api/canvas/fake-gopay?saldo=${encodeURIComponent(saldo)}&koin=${encodeURIComponent(koin)}&terpakai=${encodeURIComponent(terpakai)}&bulan=${encodeURIComponent(bulan)}&apikey=${API_KEY}`;
-      handleApiCall(url, {}, `fake-gopay-${saldo}.jpg`);
-    });
+        function updateUsageUI() {
+            Object.keys(featureUsageData).forEach(key => {
+                const el = document.getElementById(`use-count-${key}`);
+                if (el) {
+                    el.textContent = featureUsageData[key];
+                }
+            });
+        }
 
-    // 6. Sticker Meme / Smeme (POST)
-    document.getElementById('smemeForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const media = document.getElementById('smemeMediaInput').files[0];
-      const text1 = document.getElementById('smemeText1').value;
-      const text2 = document.getElementById('smemeText2').value;
+        async function incrementFeatureUsage(key) {
+            if (!key) return;
+            featureUsageData[key] = (featureUsageData[key] || 0) + 1;
+            updateUsageUI();
+            localStorage.setItem('canvas_usage_cache', JSON.stringify(featureUsageData));
 
-      if (!media) {
-        showAlertModal("Peringatan", "Harap pilih gambar meme terlebih dahulu", "warning");
-        return;
-      }
+            // Async update to Supabase
+            if (supabaseClient) {
+                try {
+                    await supabaseClient.from('canvas_usage').upsert({
+                        feature_key: key,
+                        use_count: featureUsageData[key]
+                    });
+                } catch(e) {}
+            }
+        }
 
-      const formData = new FormData();
-      formData.append('media', media);
-      formData.append('text1', text1);
-      formData.append('text2', text2);
+        // 3. CUSTOM CENTER NOTIFICATION SYSTEM
+        function showNotification({ type = 'info', title = '', message = '', autoClose = 0 }) {
+            const overlay = document.getElementById('custom-notification-overlay');
+            const iconContainer = document.getElementById('notif-icon-container');
+            const notifTitle = document.getElementById('notif-title');
+            const notifMessage = document.getElementById('notif-message');
+            const notifBtn = document.getElementById('notif-btn');
 
-      handleApiCall(`https://api.kyzzz.xyz/api/maker/smeme?apikey=${API_KEY}`, {
-        method: 'POST',
-        body: formData
-      }, 'sticker-meme.png');
-    });
+            notifTitle.textContent = title;
+            notifMessage.textContent = message;
+            notifBtn.style.display = 'block';
 
-    // Initialize Animations & User Session on Page Load
-    window.addEventListener('DOMContentLoaded', () => {
-      initBubbles();
-      initUserSession();
-    });
-  </script>
+            if (type === 'success') {
+                iconContainer.className = "w-14 h-14 rounded-2xl mb-4 flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/60 text-gopay border border-emerald-100 dark:border-emerald-800";
+                iconContainer.innerHTML = `<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>`;
+            } else if (type === 'error') {
+                iconContainer.className = "w-14 h-14 rounded-2xl mb-4 flex items-center justify-center bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800";
+                iconContainer.innerHTML = `<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+            } else if (type === 'warning') {
+                iconContainer.className = "w-14 h-14 rounded-2xl mb-4 flex items-center justify-center bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800";
+                iconContainer.innerHTML = `<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`;
+            } else if (type === 'loading') {
+                iconContainer.className = "w-14 h-14 rounded-2xl mb-4 flex items-center justify-center bg-emerald-50 dark:bg-emerald-950/60 text-gopay border border-emerald-100 dark:border-emerald-800";
+                iconContainer.innerHTML = `<svg class="w-7 h-7 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+                notifBtn.style.display = 'none';
+            } else {
+                iconContainer.className = "w-14 h-14 rounded-2xl mb-4 flex items-center justify-center bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-sky-800";
+                iconContainer.innerHTML = `<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+            }
+
+            overlay.classList.remove('hidden-modal');
+            overlay.classList.add('show-modal');
+
+            if (autoClose > 0) {
+                setTimeout(() => {
+                    hideNotification();
+                }, autoClose);
+            }
+        }
+
+        function hideNotification() {
+            const overlay = document.getElementById('custom-notification-overlay');
+            overlay.classList.remove('show-modal');
+            overlay.classList.add('hidden-modal');
+        }
+
+        // 4. CATEGORY FILTER HANDLER
+        function filterCategory(cat) {
+            const cards = document.querySelectorAll('.feature-card');
+            const tabs = document.querySelectorAll('.filter-tab');
+            
+            tabs.forEach(tab => {
+                tab.className = "filter-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700";
+            });
+
+            const activeTab = document.getElementById(`tab-${cat}`);
+            if(activeTab) {
+                activeTab.className = "filter-tab active-tab px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-gopay text-white shadow-sm";
+            }
+
+            cards.forEach(card => {
+                if (cat === 'all' || card.classList.contains(cat)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 5. DYNAMIC TOOL MODAL INPUT RENDERER FOR ALL 11 FEATURES
+        function openToolModal(key) {
+            activeToolKey = key;
+            const modal = document.getElementById('tool-form-modal');
+            const titleEl = document.getElementById('modal-tool-title');
+            const subtitleEl = document.getElementById('modal-tool-subtitle');
+            const iconEl = document.getElementById('modal-tool-icon');
+            const formContainer = document.getElementById('modal-form-container');
+
+            let title = "";
+            let subtitle = "";
+            let formHtml = "";
+
+            const inputStyle = "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 focus-ring transition";
+
+            if (key === 'sertifikat') {
+                title = "Sertifikat Tolol";
+                subtitle = "API GET - Canvas Generator";
+                iconEl.innerHTML = `📜`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Sertifikat</label>
+                        <input type="text" id="input-name" value="Pemain Epep Tolol" placeholder="Masukkan nama..." class="${inputStyle}">
+                    </div>
+                `;
+            } else if (key === 'reminder') {
+                title = "Reminder Text";
+                subtitle = "API GET - Text Highlight";
+                iconEl.innerHTML = `⏰`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pesan Pengingat</label>
+                        <textarea id="input-text" rows="3" class="${inputStyle}">Hidup itu hanya [satu] [kali] jadi berusahalah menjadi [orang] [yang] [baik]</textarea>
+                        <p class="text-[10px] text-slate-400 mt-1">Gunakan kurung siku [kata] untuk memberikan sorotan warna.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Penulis (Author)</label>
+                        <input type="text" id="input-author" value="kyzz" placeholder="Nama..." class="${inputStyle}">
+                    </div>
+                `;
+            } else if (key === 'quote-nokia') {
+                title = "Quote Nokia";
+                subtitle = "API GET - Retro Screen";
+                iconEl.innerHTML = `📱`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pesan Teks (Message)</label>
+                        <textarea id="input-message" rows="3" class="${inputStyle}">Jangan pernah menyerah pada impianmu hanya karena prosesnya terasa lama dan melelahkan</textarea>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pengirim</label>
+                            <input type="text" id="input-sender" value="kyzz" class="${inputStyle}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tanggal</label>
+                            <input type="text" id="input-date" value="13" class="${inputStyle}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Jam</label>
+                            <input type="text" id="input-time" value="17.00" class="${inputStyle}">
+                        </div>
+                    </div>
+                `;
+            } else if (key === 'ffduo') {
+                title = "Free Fire Duo";
+                subtitle = "API GET - Gaming Banner";
+                iconEl.innerHTML = `🎮`;
+                formHtml = `
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pemain 1 (User 1)</label>
+                            <input type="text" id="input-user1" value="Athar" class="${inputStyle}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pemain 2 (User 2)</label>
+                            <input type="text" id="input-user2" value="Rina" class="${inputStyle}">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Template Choice</label>
+                        <select id="input-template" class="${inputStyle}">
+                            <option value="random">Acak / Random</option>
+                            <option value="1">Template 1</option>
+                            <option value="2">Template 2</option>
+                        </select>
+                    </div>
+                `;
+            } else if (key === 'fake-dana') {
+                title = "Fake DANA Saldo";
+                subtitle = "API GET - Wallet Mockup";
+                iconEl.innerHTML = `💸`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nominal Saldo (Rp)</label>
+                        <input type="number" id="input-saldo" value="150000" class="${inputStyle}">
+                    </div>
+                `;
+            } else if (key === 'anime-quotes') {
+                title = "Anime Quotes";
+                subtitle = "API GET - Quotes Card";
+                iconEl.innerHTML = `⛩️`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Kutipan / Text</label>
+                        <textarea id="input-text" rows="3" class="${inputStyle}">Semua manusia hanyalah alat</textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Username / Tokoh</label>
+                            <input type="text" id="input-username" value="- Ayanokoji" class="${inputStyle}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Background ID</label>
+                            <input type="text" id="input-bg" value="1" class="${inputStyle}">
+                        </div>
+                    </div>
+                `;
+            } else if (key === 'mpls') {
+                title = "Frame MPLS";
+                subtitle = "API POST - Frame Merger";
+                iconEl.innerHTML = `🖼️`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Upload Foto</label>
+                        <input type="file" id="input-file-image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gopay-light file:text-gopay">
+                    </div>
+                    <div class="relative flex py-1 items-center">
+                        <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                        <span class="flex-shrink mx-2 text-[10px] font-bold text-slate-400 uppercase">Atau URL Gambar</span>
+                        <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">URL Gambar</label>
+                        <input type="text" id="input-url" value="https://files.clugx.my.id/contoh-mpls.jpg" class="${inputStyle}">
+                    </div>
+                `;
+            } else if (key === 'igqc') {
+                title = "IG Quote Card (IGQC)";
+                subtitle = "API POST - Story Card";
+                iconEl.innerHTML = `💬`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Upload Avatar / Foto</label>
+                        <input type="file" id="input-file-image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gopay-light file:text-gopay">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Teks Quote</label>
+                        <textarea id="input-text" rows="2" class="${inputStyle}">Halo apa kabar</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Jam / Status</label>
+                        <input type="text" id="input-time" value="SAB 15.28" class="${inputStyle}">
+                    </div>
+                `;
+            } else if (key === 'fake-call') {
+                title = "Fake Call Screen";
+                subtitle = "API POST - Calling Screen";
+                iconEl.innerHTML = `📞`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Foto Profil Pemanggil</label>
+                        <input type="file" id="input-file-profile" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gopay-light file:text-gopay">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nama Kontak</label>
+                            <input type="text" id="input-nama" value="my heart ❤️" class="${inputStyle}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Durasi Call</label>
+                            <input type="text" id="input-durasi" value="01:00:39" class="${inputStyle}">
+                        </div>
+                    </div>
+                `;
+            } else if (key === 'fake-ktp') {
+                title = "Fake KTP Generator";
+                subtitle = "API POST - Identity Simulator";
+                iconEl.innerHTML = `🪪`;
+                formHtml = `
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700 mb-2">
+                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Data Identitas KTP</span>
+                        <button type="button" onclick="fillPresetKtp()" class="px-2.5 py-1 rounded-lg bg-gopay-light dark:bg-gopay-darkbg text-gopay font-bold text-[10px] active:scale-95">
+                            ⚡ Isi Otomatis
+                        </button>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pas Foto</label>
+                        <input type="file" id="input-pas-photo" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gopay-light file:text-gopay">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Provinsi</label><input type="text" id="ktp-provinsi" value="JAWA BARAT" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Kota</label><input type="text" id="ktp-kota" value="BANDUNG" class="${inputStyle}"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block text-[11px] font-semibold text-slate-500">NIK</label><input type="text" id="ktp-nik" value="3273010101010001" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Nama</label><input type="text" id="ktp-nama" value="JOHN DOE" class="${inputStyle}"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block text-[11px] font-semibold text-slate-500">TTL</label><input type="text" id="ktp-ttl" value="BANDUNG, 01-01-2000" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Jenis Kelamin</label><input type="text" id="ktp-jk" value="LAKI-LAKI" class="${inputStyle}"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Gol Darah</label><input type="text" id="ktp-gol" value="O" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">RT/RW</label><input type="text" id="ktp-rtrw" value="001/002" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Agama</label><input type="text" id="ktp-agama" value="ISLAM" class="${inputStyle}"></div>
+                    </div>
+                    <div><label class="block text-[11px] font-semibold text-slate-500">Alamat</label><input type="text" id="ktp-alamat" value="JL. MERDEKA NO. 1" class="${inputStyle}"></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Kel/Desa</label><input type="text" id="ktp-kel" value="CIBADUYUT" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Kecamatan</label><input type="text" id="ktp-kec" value="BOJONGLOA KIDUL" class="${inputStyle}"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Status</label><input type="text" id="ktp-status" value="BELUM KAWIN" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Pekerjaan</label><input type="text" id="ktp-pekerjaan" value="SWASTA" class="${inputStyle}"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Kewarganegaraan</label><input type="text" id="ktp-kwn" value="WNI" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Masa Berlaku</label><input type="text" id="ktp-berlaku" value="SEUMUR HIDUP" class="${inputStyle}"></div>
+                        <div><label class="block text-[11px] font-semibold text-slate-500">Terbuat</label><input type="text" id="ktp-terbuat" value="BANDUNG, 01-01-2020" class="${inputStyle}"></div>
+                    </div>
+                `;
+            } else if (key === 'remove-bg') {
+                title = "Remove Background";
+                subtitle = "API POST - AI BG Removal";
+                iconEl.innerHTML = `✂️`;
+                formHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">File Foto / Gambar</label>
+                        <input type="file" id="input-file-image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gopay-light file:text-gopay">
+                    </div>
+                `;
+            }
+
+            titleEl.textContent = title;
+            subtitleEl.textContent = subtitle;
+            formContainer.innerHTML = formHtml;
+
+            modal.classList.remove('hidden-modal');
+            modal.classList.add('show-modal');
+        }
+
+        function closeToolModal() {
+            const modal = document.getElementById('tool-form-modal');
+            modal.classList.remove('show-modal');
+            modal.classList.add('hidden-modal');
+        }
+
+        function fillPresetKtp() {
+            if (document.getElementById('ktp-nama')) {
+                document.getElementById('ktp-provinsi').value = "JAWA BARAT";
+                document.getElementById('ktp-kota').value = "BANDUNG";
+                document.getElementById('ktp-nik').value = "3273010101010001";
+                document.getElementById('ktp-nama').value = "JOHN DOE";
+                document.getElementById('ktp-ttl').value = "BANDUNG, 01-01-2000";
+                document.getElementById('ktp-jk').value = "LAKI-LAKI";
+                document.getElementById('ktp-gol').value = "O";
+                document.getElementById('ktp-alamat').value = "JL. MERDEKA NO. 1";
+                document.getElementById('ktp-rtrw').value = "001/002";
+                document.getElementById('ktp-kel').value = "CIBADUYUT";
+                document.getElementById('ktp-kec').value = "BOJONGLOA KIDUL";
+                document.getElementById('ktp-agama').value = "ISLAM";
+                document.getElementById('ktp-status').value = "BELUM KAWIN";
+                document.getElementById('ktp-pekerjaan').value = "SWASTA";
+                document.getElementById('ktp-kwn').value = "WNI";
+                document.getElementById('ktp-berlaku').value = "SEUMUR HIDUP";
+                document.getElementById('ktp-terbuat').value = "BANDUNG, 01-01-2020";
+            }
+        }
+
+        // 6. MAIN SUBMIT API DISPATCHER + USAGE COUNTER INCREMENT
+        async function submitActiveTool() {
+            if (!activeToolKey) return;
+
+            // Increment usage counter in state and Supabase (+1)
+            incrementFeatureUsage(activeToolKey);
+
+            showNotification({
+                type: 'loading',
+                title: 'Memproses Gambar...',
+                message: 'Mohon tunggu, sistem sedang memproses API.'
+            });
+
+            try {
+                if (activeToolKey === 'sertifikat') {
+                    const name = document.getElementById('input-name').value.trim() || 'Pemain Epep Tolol';
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/sertifikat-tolol?name=${encodeURIComponent(name)}&apikey=${API_KEY}`;
+                    await fetchImageResult(targetUrl);
+                } 
+                else if (activeToolKey === 'reminder') {
+                    const text = document.getElementById('input-text').value.trim();
+                    const author = document.getElementById('input-author').value.trim() || 'kyzz';
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/reminder?text=${encodeURIComponent(text)}&author=${encodeURIComponent(author)}&apikey=${API_KEY}`;
+                    await fetchImageResult(targetUrl);
+                } 
+                else if (activeToolKey === 'quote-nokia') {
+                    const message = document.getElementById('input-message').value.trim();
+                    const sender = document.getElementById('input-sender').value.trim() || 'kyzz';
+                    const date = document.getElementById('input-date').value.trim() || '13';
+                    const time = document.getElementById('input-time').value.trim() || '17.00';
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/quote-nokia?message=${encodeURIComponent(message)}&sender=${encodeURIComponent(sender)}&date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&apikey=${API_KEY}`;
+                    await fetchImageResult(targetUrl);
+                }
+                else if (activeToolKey === 'ffduo') {
+                    const user1 = document.getElementById('input-user1').value.trim() || 'Athar';
+                    const user2 = document.getElementById('input-user2').value.trim() || 'Rina';
+                    const template = document.getElementById('input-template').value || 'random';
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/ffduo?user1=${encodeURIComponent(user1)}&user2=${encodeURIComponent(user2)}&template=${encodeURIComponent(template)}&apikey=${API_KEY}`;
+                    await fetchImageResult(targetUrl);
+                }
+                else if (activeToolKey === 'fake-dana') {
+                    const saldo = document.getElementById('input-saldo').value.trim() || '150000';
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/fake-dana?saldo=${encodeURIComponent(saldo)}&apikey=${API_KEY}`;
+                    await fetchImageResult(targetUrl);
+                }
+                else if (activeToolKey === 'anime-quotes') {
+                    const text = document.getElementById('input-text').value.trim();
+                    const username = document.getElementById('input-username').value.trim() || '- Ayanokoji';
+                    const bg = document.getElementById('input-bg').value.trim() || '1';
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/anime-quotes?text=${encodeURIComponent(text)}&username=${encodeURIComponent(username)}&background=${encodeURIComponent(bg)}&apikey=${API_KEY}`;
+                    await fetchImageResult(targetUrl);
+                }
+                else if (activeToolKey === 'mpls') {
+                    const fileInput = document.getElementById('input-file-image');
+                    const urlInput = document.getElementById('input-url');
+                    const formData = new FormData();
+
+                    if (fileInput && fileInput.files.length > 0) {
+                        formData.append('image', fileInput.files[0]);
+                    } else if (urlInput && urlInput.value.trim() !== '') {
+                        formData.append('url', urlInput.value.trim());
+                    }
+
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/mpls?apikey=${API_KEY}`;
+                    await fetchPostResult(targetUrl, formData);
+                } 
+                else if (activeToolKey === 'igqc') {
+                    const fileInput = document.getElementById('input-file-image');
+                    const text = document.getElementById('input-text').value.trim();
+                    const time = document.getElementById('input-time').value.trim();
+                    const formData = new FormData();
+
+                    if (fileInput && fileInput.files.length > 0) {
+                        formData.append('image', fileInput.files[0]);
+                    }
+                    formData.append('text', text);
+                    formData.append('time', time);
+
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/igqc?apikey=${API_KEY}`;
+                    await fetchPostResult(targetUrl, formData);
+                } 
+                else if (activeToolKey === 'fake-call') {
+                    const fileInput = document.getElementById('input-file-profile');
+                    const nama = document.getElementById('input-nama').value.trim() || 'my heart ❤️';
+                    const durasi = document.getElementById('input-durasi').value.trim() || '01:00:39';
+                    const formData = new FormData();
+
+                    if (fileInput && fileInput.files.length > 0) {
+                        formData.append('profile', fileInput.files[0]);
+                    }
+                    formData.append('nama', nama);
+                    formData.append('durasi', durasi);
+
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/fake-call?apikey=${API_KEY}`;
+                    await fetchPostResult(targetUrl, formData);
+                }
+                else if (activeToolKey === 'fake-ktp') {
+                    const fileInput = document.getElementById('input-pas-photo');
+                    const formData = new FormData();
+
+                    if (fileInput && fileInput.files.length > 0) {
+                        formData.append('pas_photo', fileInput.files[0]);
+                    }
+
+                    formData.append('provinsi', document.getElementById('ktp-provinsi').value);
+                    formData.append('kota', document.getElementById('ktp-kota').value);
+                    formData.append('nik', document.getElementById('ktp-nik').value);
+                    formData.append('nama', document.getElementById('ktp-nama').value);
+                    formData.append('ttl', document.getElementById('ktp-ttl').value);
+                    formData.append('jenis_kelamin', document.getElementById('ktp-jk').value);
+                    formData.append('golongan_darah', document.getElementById('ktp-gol').value);
+                    formData.append('alamat', document.getElementById('ktp-alamat').value);
+                    formData.append('rt_rw', document.getElementById('ktp-rtrw').value);
+                    formData.append('kel_desa', document.getElementById('ktp-kel').value);
+                    formData.append('kecamatan', document.getElementById('ktp-kec').value);
+                    formData.append('agama', document.getElementById('ktp-agama').value);
+                    formData.append('status', document.getElementById('ktp-status').value);
+                    formData.append('pekerjaan', document.getElementById('ktp-pekerjaan').value);
+                    formData.append('kewarganegaraan', document.getElementById('ktp-kwn').value);
+                    formData.append('masa_berlaku', document.getElementById('ktp-berlaku').value);
+                    formData.append('terbuat', document.getElementById('ktp-terbuat').value);
+
+                    const targetUrl = `https://api.kyzzz.xyz/api/canvas/fake-ktp?apikey=${API_KEY}`;
+                    await fetchPostResult(targetUrl, formData);
+                } 
+                else if (activeToolKey === 'remove-bg') {
+                    const fileInput = document.getElementById('input-file-image');
+                    if (!fileInput || fileInput.files.length === 0) {
+                        hideNotification();
+                        showNotification({
+                            type: 'warning',
+                            title: 'Pilih File Gambar',
+                            message: 'Sertakan file foto untuk diproses.'
+                        });
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    formData.append('image', fileInput.files[0]);
+
+                    const targetUrl = `https://api.kyzzz.xyz/api/tools/remove-bg?apikey=${API_KEY}`;
+                    await fetchPostResult(targetUrl, formData);
+                }
+            } catch (err) {
+                hideNotification();
+                showNotification({
+                    type: 'error',
+                    title: 'Gagal Memproses',
+                    message: 'Terjadi masalah pada koneksi server API.'
+                });
+            }
+        }
+
+        // Fetch GET Image
+        async function fetchImageResult(url) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Gagal mengambil respon gambar");
+                
+                const blob = await res.blob();
+                const objUrl = URL.createObjectURL(blob);
+                
+                closeToolModal();
+                hideNotification();
+                openResultModal(objUrl);
+            } catch (e) {
+                hideNotification();
+                showNotification({
+                    type: 'error',
+                    title: 'Gagal Memuat',
+                    message: 'Pastikan koneksi internet aktif dan parameter valid.'
+                });
+            }
+        }
+
+        // Fetch POST Image
+        async function fetchPostResult(url, formData) {
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    throw new Error("Gagal memproses POST request.");
+                }
+
+                const contentType = res.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    const jsonRes = await res.json();
+                    if (jsonRes.url || jsonRes.result) {
+                        const imgUrl = jsonRes.url || jsonRes.result;
+                        closeToolModal();
+                        hideNotification();
+                        openResultModal(imgUrl);
+                        return;
+                    }
+                }
+
+                const blob = await res.blob();
+                const objUrl = URL.createObjectURL(blob);
+
+                closeToolModal();
+                hideNotification();
+                openResultModal(objUrl);
+            } catch (e) {
+                hideNotification();
+                showNotification({
+                    type: 'error',
+                    title: 'Proses Gagal',
+                    message: e.message || 'Gagal memproses gambar.'
+                });
+            }
+        }
+
+        // Result Modal
+        function openResultModal(imageUrl) {
+            currentGeneratedUrl = imageUrl;
+            const modal = document.getElementById('result-modal');
+            const imgPreview = document.getElementById('result-image-preview');
+            const downloadBtn = document.getElementById('btn-download-image');
+
+            imgPreview.src = imageUrl;
+            downloadBtn.href = imageUrl;
+
+            modal.classList.remove('hidden-modal');
+            modal.classList.add('show-modal');
+            
+            showNotification({
+                type: 'success',
+                title: 'Selesai!',
+                message: 'Gambar berhasil dibuat dan dicatat.',
+                autoClose: 2000
+            });
+        }
+
+        function closeResultModal() {
+            const modal = document.getElementById('result-modal');
+            modal.classList.remove('show-modal');
+            modal.classList.add('hidden-modal');
+        }
+
+        function copyResultUrl() {
+            if (!currentGeneratedUrl) return;
+            const tempInput = document.createElement('input');
+            tempInput.value = currentGeneratedUrl;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showNotification({
+                type: 'success',
+                title: 'Tersalin!',
+                message: 'Link gambar berhasil disalin ke clipboard.',
+                autoClose: 2000
+            });
+        }
+
+        function openResultInTab() {
+            if (currentGeneratedUrl) {
+                window.open(currentGeneratedUrl, '_blank');
+            }
+        }
+    </script>
 </body>
 </html>
